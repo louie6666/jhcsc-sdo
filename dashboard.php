@@ -1,3 +1,14 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: index.php');
+    exit;
+}
+
+include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -330,7 +341,7 @@
         <div class="top-header">
             <div class="header-titles">
                 <h1 id="top-title" style="font-size: 24px; font-weight: 700; color: var(--text-main);">Dashboard</h1>
-                <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 4px;">Welcome back, Administrator! Today is <?php echo date('F j, Y'); ?></p>
+                <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
             </div>
             <div class="search-container">
                 <i data-lucide="search" style="width: 16px;"></i>

@@ -1,3 +1,104 @@
+<?php
+session_start();
+
+// Only process login if this is a POST request with JSON data
+$is_login_request = ($_SERVER['REQUEST_METHOD'] === 'POST' && 
+                     strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false);
+
+if ($is_login_request) {
+    header('Content-Type: application/json');
+    
+    include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
+    
+    // Get JSON input
+    $input = json_decode(file_get_contents('php://input'), true);
+    $username = isset($input['username']) ? trim($input['username']) : '';
+    $password = isset($input['password']) ? $input['password'] : '';
+
+    // Validate input
+    if (empty($username) || empty($password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Username and password are required.'
+        ]);
+        exit;
+    }
+
+    // Query the Users table
+    $query = "SELECT user_id, username, password, full_name, role_id, is_active 
+              FROM Users 
+              WHERE username = ? LIMIT 1";
+
+    $stmt = mysqli_prepare($conn, $query);
+    if (!$stmt) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error. Please try again.'
+        ]);
+        exit;
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($result) === 0) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid username or password.'
+        ]);
+        exit;
+    }
+
+    $user = mysqli_fetch_assoc($result);
+
+    // Check if user is active
+    if (!$user['is_active']) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Your account is inactive. Please contact an administrator.'
+        ]);
+        exit;
+    }
+
+    // Verify password
+    $passwordValid = false;
+
+    // Check if password is hashed (starts with $2y$ for bcrypt)
+    if (substr($user['password'], 0, 4) === '$2y$' || substr($user['password'], 0, 4) === '$2a$') {
+        $passwordValid = password_verify($password, $user['password']);
+    } else {
+        // Fallback: compare plain text
+        $passwordValid = ($password === $user['password']);
+    }
+
+    if (!$passwordValid) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid username or password.'
+        ]);
+        exit;
+    }
+
+    // Password is correct - create session
+    $_SESSION['user_id'] = $user['user_id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['full_name'] = $user['full_name'];
+    $_SESSION['role_id'] = $user['role_id'];
+    $_SESSION['logged_in'] = true;
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Login successful.',
+        'redirect' => 'dashboard.php'
+    ]);
+
+    mysqli_stmt_close($stmt);
+    mysqli_close($conn);
+    exit;
+}
+?>
+
 <style>
     /* MODAL ROOT VARIABLES - Localized for Auth */
     :root {
@@ -121,10 +222,10 @@
         <h2>Welcome back</h2>
         <p class="subtext">Welcome back! Please enter your details.</p>
         
-        <form action="modules/auth_process.php" method="POST">
+        <form id="loginForm" method="POST">
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="Enter your email" required>
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter your username" required>
             </div>
             
             <div class="form-group">
@@ -135,6 +236,60 @@
             <a href="#" class="forgot-link">Forgot password</a>
             
             <button type="submit" class="btn-login">Login</button>
+            <div id="loginError" style="color: #ef4444; font-size: 12px; margin-top: 12px; display: none;"></div>
         </form>
     </div>
 </div>
+
+<script>
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const username = document.querySelector('input[name="username"]').value;
+    const password = document.querySelector('input[name="password"]').value;
+    const errorDiv = document.getElementById('loginError');
+    const btn = document.querySelector('.btn-login');
+    
+    // Reset error
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Disable button
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Logging in...';
+    
+    // Send login request
+    fetch('modals/login.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Login successful - redirect to dashboard
+            window.location.href = 'dashboard.php';
+        } else {
+            // Show error
+            errorDiv.textContent = data.message || 'Login failed. Please try again.';
+            errorDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    })
+    .catch(error => {
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = originalText;
+        console.error('Login error:', error);
+    });
+});
+</script>

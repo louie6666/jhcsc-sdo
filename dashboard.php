@@ -246,7 +246,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 30px;
+    padding: 0 55px 0 40px;
     border-bottom: 1px solid var(--border);
     
     /* The Fix */
@@ -343,9 +343,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                 <h1 id="top-title" style="font-size: 24px; font-weight: 700; color: var(--text-main);">Dashboard</h1>
                 <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
             </div>
-            <div class="search-container">
+            <div class="search-container" id="borrowerSearchContainer" style="position: relative;">
                 <i data-lucide="search" style="width: 16px;"></i>
-                <input type="text" placeholder="Search equipment...">
+                <input type="text" id="borrowerSearchInput" placeholder="Search borrower ID or name..." autocomplete="off">
+                <div id="borrowerSearchDropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);"></div>
             </div>
         </div>
 
@@ -449,6 +450,98 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                 toggleAction();
             }
         });
+
+        // ─── BORROWER SEARCH FUNCTIONALITY ───
+        const borrowerSearchInput = document.getElementById('borrowerSearchInput');
+        const borrowerSearchDropdown = document.getElementById('borrowerSearchDropdown');
+        const borrowerSearchContainer = document.getElementById('borrowerSearchContainer');
+
+        if (borrowerSearchInput) {
+            borrowerSearchInput.addEventListener('input', async function(e) {
+                const query = this.value.trim().toLowerCase();
+                if (!query || query.length < 2) {
+                    borrowerSearchDropdown.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('modules/transactions/search_borrowers.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    const data = await response.json();
+                    if (data.success && data.borrowers && data.borrowers.length > 0) {
+                        borrowerSearchDropdown.innerHTML = data.borrowers.map(b => 
+                            `<div class="search-result-item" data-borrower-id="${b.borrower_id}" data-page="${b.page}" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                                <span style="font-weight: 600;">${b.full_name} <span style="color: #64748b; font-weight: 400;">${b.department}</span></span>
+                                <span style="color: #64748b; font-size: 12px;">${b.id_number}</span>
+                            </div>`
+                        ).join('');
+                        borrowerSearchDropdown.style.display = 'block';
+
+                        // Add click handlers
+                        borrowerSearchDropdown.querySelectorAll('.search-result-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const borrowerId = this.dataset.borrowerId;
+                                const page = this.dataset.page;
+                                borrowerSearchInput.value = '';
+                                borrowerSearchDropdown.style.display = 'none';
+                                // Navigate to borrow page and highlight
+                                loadModule('modules/transactions/borrow.php?page=' + page, null);
+                                setTimeout(() => highlightBorrowerRow(borrowerId), 500);
+                            });
+                        });
+                    } else {
+                        borrowerSearchDropdown.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: default;">
+                            <div>
+                                <div style="font-weight: 600;">Borrower not found</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Click the "+ New Transaction" button to create a new borrower</div>
+                            </div>
+                        </div>`;
+                        borrowerSearchDropdown.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    borrowerSearchDropdown.style.display = 'none';
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!borrowerSearchContainer.contains(e.target)) {
+                    borrowerSearchDropdown.style.display = 'none';
+                }
+            });
+
+            // Highlight borrower row
+            window.highlightBorrowerRow = function(borrowerId) {
+                const rows = document.querySelectorAll('.borrow-table tbody tr.main-row');
+                rows.forEach(row => {
+                    if (row.dataset.borrowerId && parseInt(row.dataset.borrowerId) === parseInt(borrowerId)) {
+                        row.style.backgroundColor = '#dfe8f5';
+                        row.style.boxShadow = 'inset 0 0 0 2px #8faadc';
+                        row.style.transition = 'all 0.3s ease';
+                        row.classList.add('highlighted-row');
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Clear highlight on row click or action button click
+                        const clearHighlight = () => {
+                            row.style.backgroundColor = '';
+                            row.style.boxShadow = '';
+                            row.classList.remove('highlighted-row');
+                            row.removeEventListener('click', clearHighlight);
+                            actionButtons.forEach(btn => btn.removeEventListener('click', clearHighlight));
+                        };
+                        
+                        row.addEventListener('click', clearHighlight);
+                        const actionButtons = row.querySelectorAll('.btn-action');
+                        actionButtons.forEach(btn => btn.addEventListener('click', clearHighlight));
+                    }
+                });
+            };
+        }
     </script>
 </body>
 </html>

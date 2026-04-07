@@ -22,7 +22,7 @@ session_start();
 include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
 // Constants
-define('ITEMS_PER_PAGE', 14);
+define('ITEMS_PER_PAGE', 10);
 define('SEARCH_LIMIT', 10);
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -356,8 +356,17 @@ function handleProcessReturn() {
         $processed = 0;
         $return_date = date('Y-m-d H:i:s');
         
-        foreach ($item_statuses as $item_record_id => $new_status) {
+        foreach ($item_statuses as $item_record_id => $status_data) {
             $item_record_id = (int)$item_record_id;
+            
+            // Handle both string and object status formats
+            $damage_description = null;
+            if (is_array($status_data)) {
+                $new_status = $status_data['status'] ?? 'Returned';
+                $damage_description = $status_data['description'] ?? null;
+            } else {
+                $new_status = $status_data;
+            }
             
             if (!in_array($new_status, $allowed_statuses)) {
                 $errors[] = "Invalid status '$new_status' for item #$item_record_id";
@@ -410,9 +419,14 @@ function handleProcessReturn() {
                                      SET damaged_qty = damaged_qty + 1 
                                      WHERE equipment_id = $equip_id");
                 
+                // Use provided description or default message
+                $issue_desc = $damage_description ? 
+                              mysqli_real_escape_string($conn, $damage_description) : 
+                              'Item returned in damaged condition.';
+                
                 mysqli_query($conn, "INSERT INTO Maintenance
                                      (equipment_id, item_record_id, issue_description, repair_status)
-                                     VALUES ($equip_id, $item_record_id, 'Item returned in damaged condition.', 'Pending')");
+                                     VALUES ($equip_id, $item_record_id, '$issue_desc', 'Pending')");
             }
             // 'Lost' - stock stays gone
         }
@@ -905,12 +919,13 @@ function renderBorrowPage($data) {
 
         .items-list > div {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             padding: 4px 0;
             font-size: 13px;
             border-bottom: 1px solid #f1f5f9;
             margin-bottom: 4px;
+            gap: 6px;
         }
 
         .items-list > div:last-child {
@@ -957,21 +972,64 @@ function renderBorrowPage($data) {
         .items-list > div {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             padding: 4px 0;
         }
 
-        .item-return-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--brw-status-ok);
+        .condition-checkboxes {
+            display: flex;
+            gap: 4px;
             flex-shrink: 0;
         }
 
-        .item-return-checkbox + span {
+        .condition-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            border-radius: 3px;
+            border: 2px solid #e2e8f0;
+            font-size: 12px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .condition-checkbox:checked {
+            font-weight: bold;
+            color: white;
+            background-size: 100% 100%;
+            border: 2px solid #10b981;
+        }
+
+        .condition-checkbox.good-condition {
+            background-color: #f0fdf4;
+            border-color: #d1fae5;
+        }
+
+        .condition-checkbox.good-condition:checked {
+            background-color: #10b981;
+            border-color: #059669;
+        }
+
+        .condition-checkbox.bad-condition {
+            background-color: #fef2f2;
+            border-color: #fee2e2;
+        }
+
+        .condition-checkbox.bad-condition:checked {
+            background-color: #dc2626;
+            border-color: #b91c1c;
+        }
+
+        .item-name {
             color: #1e293b;
             font-size: 13px;
+            flex: 1;
         }
 
         /* Pagination */
@@ -1039,6 +1097,139 @@ function renderBorrowPage($data) {
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+        /* Damage Modal Styles */
+        .damage-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .damage-modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .damage-modal {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            padding: 24px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .damage-modal-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0c1f3f;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .damage-modal-header span {
+            font-size: 20px;
+            color: #dc2626;
+        }
+
+        .damage-modal-body {
+            margin-bottom: 20px;
+        }
+
+        .damage-modal-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .damage-modal-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            color: #000000;
+        }
+
+        .damage-modal-textarea:focus {
+            outline: none;
+            border-color: #8faadc;
+            box-shadow: 0 0 0 3px rgba(143, 170, 220, 0.1);
+        }
+
+        .damage-modal-footer {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .damage-modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .damage-modal-btn-cancel {
+            background: white;
+            color: #475569;
+        }
+
+        .damage-modal-btn-cancel:hover {
+            background: #f1f5f9;
+        }
+
+        .damage-modal-btn-confirm {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .damage-modal-btn-confirm:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+        }
+
+        .damage-modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -1064,8 +1255,8 @@ function renderBorrowPage($data) {
             <thead>
                 <tr>
                     <th style="width: 12%;">ID Number</th>
-                    <th style="width: 24%;">Borrower Name</th>
-                    <th style="width: 20%;">Items Borrowed</th>
+                    <th style="width: 18%;">Borrower Name</th>
+                    <th style="width: 26%;">Items Borrowed</th>
                     <th style="width: 10%;">Borrow Date</th>
                     <th style="width: 10%;">Due Date</th>
                     <th style="width: 12%;">Contact</th>
@@ -1090,10 +1281,19 @@ function renderBorrowPage($data) {
                             <div class="items-list">
                                 <?php foreach($row['items'] as $item): ?>
                                 <div>
-                                    <input type="checkbox" class="item-return-checkbox" 
-                                        data-item-id="<?php echo $item['item_record_id']; ?>" 
-                                        data-header-id="<?php echo $row['header_id']; ?>">
-                                    <span><?php echo htmlspecialchars($item['name']); ?></span>
+                                    <div class="condition-checkboxes">
+                                        <input type="checkbox" class="condition-checkbox good-condition" 
+                                            data-item-id="<?php echo $item['item_record_id']; ?>" 
+                                            data-header-id="<?php echo $row['header_id']; ?>"
+                                            data-condition="Returned"
+                                            title="Good Condition">
+                                        <input type="checkbox" class="condition-checkbox bad-condition" 
+                                            data-item-id="<?php echo $item['item_record_id']; ?>" 
+                                            data-header-id="<?php echo $row['header_id']; ?>"
+                                            data-condition="Damaged"
+                                            title="Damaged">
+                                    </div>
+                                    <span class="item-name"><?php echo htmlspecialchars($item['name']); ?></span>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -1109,11 +1309,11 @@ function renderBorrowPage($data) {
                             <div class="actions-cell">
                                 <button class="btn-action" title="Return checked items"
                                     onclick="submitInlineReturn(<?php echo $row['header_id']; ?>)">
-                                    <span class="material-symbols-outlined">assignment_return</span>
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">assignment_return</span>
                                 </button>
                                 <button class="btn-action" title="Add items"
                                     onclick="openAddBorrowModal(<?php echo $row['header_id']; ?>, <?php echo $row['borrower_id']; ?>)">
-                                    <span class="material-symbols-outlined">add_circle</span>
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">add_circle</span>
                                 </button>
                             </div>
                         </td>
@@ -1153,31 +1353,63 @@ function renderBorrowPage($data) {
     <?php endif; ?>
 </div>
 
-
+<!-- Damage Description Modal -->
+<div class="damage-modal-overlay" id="damageModal">
+    <div class="damage-modal">
+        <div class="damage-modal-header">
+            <span class="material-symbols-outlined">error_circle</span>
+            Describe Equipment Damage
+        </div>
+        <div class="damage-modal-body">
+            <label class="damage-modal-label">What is the condition issue?</label>
+            <textarea class="damage-modal-textarea" id="damageDescription" placeholder="Describe the damage, defect, or condition issue..."></textarea>
+        </div>
+        <div class="damage-modal-footer">
+            <button class="damage-modal-btn damage-modal-btn-cancel" onclick="closeDamageModal()">Cancel</button>
+            <button class="damage-modal-btn damage-modal-btn-confirm" id="confirmDamageBtn" onclick="confirmDamageDescription()">Confirm</button>
+        </div>
+    </div>
+</div>
 
 <script>
+// ──────────────────────────────────────────────────
+// State Management for Damage Modal
+// ──────────────────────────────────────────────────
+let currentDamagedCheckbox = null;
+
 // ──────────────────────────────────────────────────
 // Inline Return Functions
 // ──────────────────────────────────────────────────
 
 function submitInlineReturn(headerId) {
-    // Get all checked checkboxes for this header
+    // Get all checked condition checkboxes for this header
     const row = event.target.closest('tr');
-    const checkboxes = row.querySelectorAll('.item-return-checkbox:checked');
+    const checkedCheckboxes = row.querySelectorAll('.condition-checkbox:checked');
     
-    if (checkboxes.length === 0) {
-        alert('Please select at least one item to return.');
+    if (checkedCheckboxes.length === 0) {
+        alert('Please select condition (Good or Damaged) for at least one item to return.');
         return;
     }
     
     if (!confirm('Have you verified the condition of all checked items?')) return;
     if (!confirm('Are you sure you want to return the selected items?')) return;
     
-    // Build items object from checked boxes
+    // Build items object from checked boxes with their condition
     const items = {};
-    row.querySelectorAll('.item-return-checkbox').forEach(cb => {
-        const itemId = cb.dataset.itemId;
-        items[itemId] = cb.checked ? 'Returned' : 'Lost';
+    row.querySelectorAll('.condition-checkboxes').forEach(checkboxGroup => {
+        const goodCheckbox = checkboxGroup.querySelector('.good-condition');
+        const badCheckbox = checkboxGroup.querySelector('.bad-condition');
+        const itemId = goodCheckbox.dataset.itemId;
+        
+        if (goodCheckbox.checked) {
+            items[itemId] = 'Returned'; // Good condition
+        } else if (badCheckbox.checked) {
+            items[itemId] = 'Damaged'; // Damaged - goes to maintenance
+            // Store damage description if available
+            if (badCheckbox.dataset.damageDescription) {
+                items[itemId] = { status: 'Damaged', description: badCheckbox.dataset.damageDescription };
+            }
+        }
     });
     
     const formData = new FormData();
@@ -1188,7 +1420,7 @@ function submitInlineReturn(headerId) {
     const btn = event.target.closest('.btn-action');
     const originalContent = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">hourglass_empty</span>';
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 8px;">hourglass_empty</span>';
     
     fetch('modules/transactions/borrow.php', {
         method: 'POST',
@@ -1197,7 +1429,7 @@ function submitInlineReturn(headerId) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; color: green;">check_circle</span>';
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 8px; color: green;">check_circle</span>';
             setTimeout(() => location.reload(), 500);
         } else {
             alert(data.message || 'Return failed');
@@ -1212,6 +1444,76 @@ function submitInlineReturn(headerId) {
         btn.disabled = false;
     });
 }
+
+// ──────────────────────────────────────────────────
+// Damage Modal Functions
+// ──────────────────────────────────────────────────
+
+function openDamageModal(checkbox) {
+    currentDamagedCheckbox = checkbox;
+    const modal = document.getElementById('damageModal');
+    const textarea = document.getElementById('damageDescription');
+    
+    // Clear textarea
+    textarea.value = checkbox.dataset.damageDescription || '';
+    textarea.focus();
+    
+    // Show modal
+    modal.classList.add('active');
+}
+
+function closeDamageModal() {
+    const modal = document.getElementById('damageModal');
+    modal.classList.remove('active');
+    currentDamagedCheckbox = null;
+}
+
+function confirmDamageDescription() {
+    if (!currentDamagedCheckbox) return;
+    
+    const textarea = document.getElementById('damageDescription');
+    const description = textarea.value.trim();
+    
+    if (!description) {
+        alert('Please describe the damage');
+        return;
+    }
+    
+    // Store damage description on the checkbox
+    currentDamagedCheckbox.dataset.damageDescription = description;
+    
+    // Close modal
+    closeDamageModal();
+}
+
+// ──────────────────────────────────────────────────
+// Condition Checkbox Logic
+// ──────────────────────────────────────────────────
+
+// Prevent checking both good and damaged condition for same item
+document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('condition-checkbox')) return;
+    
+    const checkboxGroup = e.target.parentElement;
+    const goodCheckbox = checkboxGroup.querySelector('.good-condition');
+    const badCheckbox = checkboxGroup.querySelector('.bad-condition');
+    
+    if (e.target.classList.contains('good-condition') && e.target.checked) {
+        badCheckbox.checked = false;
+    } else if (e.target.classList.contains('bad-condition') && e.target.checked) {
+        goodCheckbox.checked = false;
+        // Open damage description modal when red checkbox is checked
+        setTimeout(() => openDamageModal(badCheckbox), 100);
+    }
+});
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('damageModal');
+    if (e.target === modal) {
+        closeDamageModal();
+    }
+});
 
 // ──────────────────────────────────────────────────
 // Modal Functions (overridden by modals)

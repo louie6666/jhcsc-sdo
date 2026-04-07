@@ -95,7 +95,7 @@ while($c = mysqli_fetch_assoc($cat_query)) {
 }
 
 // --- PAGINATION LOGIC ---
-$limit = 21; // 3 rows of 7 cards
+$limit = 14; // 3 rows of 7 cards
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 if ($page == 1) {
@@ -132,10 +132,10 @@ $items_result = mysqli_query($conn, $query);
         --equipment-border-color: #ffffff;
         --equipment-radius: 8px;
 
-        /* Card Dimensions */
+        /* Card Dimensions 150, 210, 40 */
         --equipment-card-width: 200px;
-        --equipment-card-height: 300px;
-        --equipment-img-height: 55%; 
+        --equipment-card-height: 320px;
+        --equipment-img-height: 60%; 
 
         /* Font Sizes */
         --equipment-fs-label: 12px;

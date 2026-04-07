@@ -1,0 +1,14 @@
+# Handle line endings automatically for all text files
+* text=auto
+
+# Specifically force PHP, HTML, CSS, and JS to use LF (Unix style)
+*.php text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+
+# Ensure images and other binary files are not messed with
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

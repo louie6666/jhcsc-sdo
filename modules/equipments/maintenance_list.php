@@ -349,7 +349,8 @@ function renderMaintenancePage($data) {
 
         .maint-header-text {
             font-size: 14px;
-            color: #475569;
+            color: #000000;
+            font-weight: 400;
             margin: 0;
         }
 

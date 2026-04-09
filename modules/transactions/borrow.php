@@ -898,7 +898,7 @@ function renderBorrowPage($data) {
 
         .borrow-header-text {
             font-size: 14px;
-            color: #475569;
+            color: #000000;
             margin: 0;
         }
 

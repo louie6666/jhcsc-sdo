@@ -95,7 +95,7 @@ while($c = mysqli_fetch_assoc($cat_query)) {
 }
 
 // --- PAGINATION LOGIC ---
-$limit = 14; // 3 rows of 7 cards
+$limit = 12; // 3 rows of 7 cards
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 if ($page == 1) {
@@ -179,8 +179,9 @@ $items_result = mysqli_query($conn, $query);
     }
 
     .equipment-container .stats-text { 
-        font-size: var(--equipment-fs-info); 
-        font-weight: var(--equipment-fw-normal);
+        font-size: 14px; 
+        font-weight: 400;
+        color: #000000;
     }
     
     .equipment-container .stats-text b {
@@ -194,21 +195,21 @@ $items_result = mysqli_query($conn, $query);
         align-items: center; 
         gap: 8px; 
         padding: var(--btn-padding); 
-        background: var(--equipment-border-color); 
-        border: none; 
+        background: #f7faf7; 
+        border: 1px solid #d8e1d8; 
         border-radius: var(--equipment-radius);
-        font-weight: var(--equipment-fw-normal); 
+        font-weight: 400; 
         font-size: var(--equipment-fs-button); 
         cursor: pointer; 
-        transition: 0.2s;
+        transition: none;
     }
     .equipment-container .btn-filter:hover { 
-        background: var(--equipment-hover); 
+        background: #f7faf7;
     }
     
     .equipment-container .btn-filter.active-filter {
-        border: 1px solid var(--equipment-buttons);
-        background: #f0f4f8;
+        border: 1px solid #cfd9cf;
+        background: #eef4ee;
     }
 
     /* --- SAAS Dropdowns --- */
@@ -495,20 +496,20 @@ $items_result = mysqli_query($conn, $query);
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        background: var(--equipment-border-color);
-        color: var(--equipment-buttons);
+        background: #ffffff;
+        color: #475569;
         text-decoration: none;
         border-radius: var(--equipment-radius);
-        font-size: 14px;
-        font-weight: var(--equipment-fw-bold);
-        border: 1px solid var(--saas-border);
-        transition: 0.2s;
+        font-size: 12px;
+        font-weight: 400;
+        border: 1px solid #d8e1d8;
+        transition: none;
     }
 
     .saas-nav-btn:hover:not(.disabled) {
-        background: var(--equipment-hover);
-        color: var(--equipment-font-color);
-        border-color: transparent;
+        background: #ffffff;
+        color: #475569;
+        border-color: #d8e1d8;
     }
 
     .saas-nav-btn.disabled {
@@ -529,20 +530,20 @@ $items_result = mysqli_query($conn, $query);
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        color: #444;
+        color: #64748b;
         border-radius: var(--equipment-radius);
-        font-size: 14px;
-        font-weight: var(--equipment-fw-bold);
-        transition: 0.2s;
+        font-size: 12px;
+        font-weight: 400;
+        transition: none;
     }
 
     .saas-page-link.active {
-        background: var(--equipment-buttons);
+        background: #0c1f3f;
         color: white;
     }
 
     .saas-page-link:hover:not(.active) {
-        background: rgba(0,0,0,0.05);
+        background: transparent;
     }
 </style>
 

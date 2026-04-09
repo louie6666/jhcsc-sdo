@@ -22,21 +22,21 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     <style>
         :root {
             /* COLORS */
-            --dbui-bg-primary: #f8fafc;
-            --dbui-sidebar-bg: #f5f7f5;
-            --dbui-text-main: #000000;
+            --dbui-bg-primary: #ecefec;
+            --dbui-sidebar-bg: #ecefec;
+            --dbui-text-main: #1f2937;
             --dbui-text-light: #ffffff;
-            --dbui-text-muted: #6b7280;
-            --dbui-hover-bg: #edf3ed;
-            --dbui-hover-submenu: #edf3ed;
-            --dbui-active-link: #edf3ed;
-            --dbui-border: transparent;
+            --dbui-text-muted: #000000;
+            --dbui-hover-bg: #f0f4f0;
+            --dbui-hover-submenu: #f0f4f0;
+            --dbui-active-link: #e8efe8;
+            --dbui-border: #e2e8e2;
             --dbui-menu-text: #000000;
 
             /* SIZING */
             --dbui-sidebar-width: 230px;
             --dbui-sidebar-collapsed-width: 80px;
-            --dbui-header-height: 60px;
+            --dbui-header-height: 48px;
             --dbui-radius: 8px;
             --dbui-icon-size: 18px; 
             /* Sidebar hover inset from left/right edge (adjust to 5px or 10px as you like) */
@@ -50,9 +50,12 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             /* Space between logo and title text in header */
             --dbui-sidebar-logo-title-gap: 5px;
 
-            /* --- ADJUST CONTENT SPACING --- */
-            --dbui-body-padding-top: 1px; 
-            --dbui-body-padding-side: 1px; 
+            /* --- ADJUST CONTENT SPACING (change these anytime) --- */
+            --dbui-body-padding-top: 1px;
+            /* Main content left breathing space (current value already reduced by 40) */
+            --dbui-content-padding-left: 160px;
+            /* Main content right breathing space (current value already reduced by 40) */
+            --dbui-content-padding-right: 160px;
         }
 
         * {
@@ -80,7 +83,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             flex-direction: column;
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border-right: 1px solid var(--dbui-text-submenu);
+            border-right: 1px solid var(--dbui-border);
         }
 
         .sidebar.collapsed { width: var(--dbui-sidebar-collapsed-width); }
@@ -159,6 +162,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             height: var(--dbui-icon-size) !important;
             margin-right: var(--dbui-sidebar-icon-text-gap); 
             stroke-width: 1.5;
+            color: var(--dbui-menu-text);
         }
 
         .nav-link:hover { background-color: var(--dbui-hover-bg); color: var(--dbui-text-main); }
@@ -209,7 +213,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         .sidebar.collapsed .submenu { display: none; }
         
         .sidebar.collapsed .header-left { justify-content: center; width: 100%; }
-        .sidebar.collapsed .nav-link svg { margin-right: 0; }
+        .sidebar.collapsed .nav-link { color: var(--dbui-menu-text); }
+        .sidebar.collapsed .nav-link svg {
+            margin-right: 0;
+            width: var(--dbui-icon-size) !important;
+            height: var(--dbui-icon-size) !important;
+            color: var(--dbui-menu-text);
+        }
         .sidebar.collapsed .nav-menu { padding: 0 20px; }
 
         /* MAIN CONTENT */
@@ -231,18 +241,6 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             width: 100%;
             flex-shrink: 0;
         }*/
-
-        .search-container { position: relative; width: 280px; }
-        .search-container input {
-            width: 100%;
-            padding: 8px 12px 8px 35px;
-            border-radius: var(--dbui-radius);
-            border: 1px solid #e5e7eb;
-            font-size: 14px;
-            background: var(--dbui-bg-primary);
-            outline: none;
-        }
-        .search-container svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--dbui-text-muted); }
 
         /*.dashboard-body { padding: var(--body-padding-top) var(--body-padding-side); }*/
         /* This is the parent of the header and the body */
@@ -275,7 +273,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 .dashboard-body {
     flex: 1; /* Takes up all remaining space */
     overflow-y: auto; /* The scroll happens ONLY here now */
-    padding: var(--dbui-body-padding-top) var(--dbui-body-padding-side);
+    /* Adjust left/right white space using the variables in :root */
+    padding: var(--dbui-body-padding-top) var(--dbui-content-padding-right) var(--dbui-body-padding-top) var(--dbui-content-padding-left);
     background-color: var(--dbui-bg-primary);
 }
         .dashboard-body h2 { font-size: 24px; color: var(--dbui-text-main); }
@@ -354,13 +353,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     <div class="main-content">
         <div class="top-header">
             <div class="header-titles">
-                <h1 id="top-title" style="font-size: 24px; font-weight: 700; color: var(--dbui-text-main);">Dashboard</h1>
+                <h1 id="top-title" style="font-size: 14px; font-weight: 400; color: var(--dbui-text-main);">Dashboard</h1>
                 <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--dbui-text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
-            </div>
-            <div class="search-container" id="borrowerSearchContainer" style="position: relative;">
-                <i data-lucide="search" style="width: 16px;"></i>
-                <input type="text" id="borrowerSearchInput" placeholder="Search borrower ID or name..." autocomplete="off">
-                <div id="borrowerSearchDropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);"></div>
             </div>
         </div>
 
@@ -430,10 +424,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             const toggle = document.getElementById(toggleId);
             const menu = document.getElementById(menuId);
             const icon = toggle.querySelector('.chevron-icon');
+            const syncChevron = () => {
+                icon.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+            };
+
+            // Ensure default state is always correct on load
+            syncChevron();
 
             toggle.addEventListener('click', () => {
-                const isOpen = menu.classList.toggle('open');
-                icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                menu.classList.toggle('open');
+                syncChevron();
             });
         };
 
@@ -449,6 +449,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             sidebar.classList.toggle('collapsed');
             if(sidebar.classList.contains('collapsed')) {
                 document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
+                document.querySelectorAll('.chevron-icon').forEach(icon => {
+                    icon.style.transform = 'rotate(0deg)';
+                });
             }
             lucide.createIcons();
         };
@@ -458,97 +461,6 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             toggleAction();
         });
 
-        // ─── BORROWER SEARCH FUNCTIONALITY ───
-        const borrowerSearchInput = document.getElementById('borrowerSearchInput');
-        const borrowerSearchDropdown = document.getElementById('borrowerSearchDropdown');
-        const borrowerSearchContainer = document.getElementById('borrowerSearchContainer');
-
-        if (borrowerSearchInput) {
-            borrowerSearchInput.addEventListener('input', async function(e) {
-                const query = this.value.trim().toLowerCase();
-                if (!query || query.length < 2) {
-                    borrowerSearchDropdown.style.display = 'none';
-                    return;
-                }
-
-                try {
-                    const response = await fetch('modules/transactions/search_borrowers.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query: query })
-                    });
-
-                    const data = await response.json();
-                    if (data.success && data.borrowers && data.borrowers.length > 0) {
-                        borrowerSearchDropdown.innerHTML = data.borrowers.map(b => 
-                            `<div class="search-result-item" data-borrower-id="${b.borrower_id}" data-page="${b.page}" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                                <span style="font-weight: 600;">${b.full_name} <span style="color: #64748b; font-weight: 400;">${b.department}</span></span>
-                                <span style="color: #64748b; font-size: 12px;">${b.id_number}</span>
-                            </div>`
-                        ).join('');
-                        borrowerSearchDropdown.style.display = 'block';
-
-                        // Add click handlers
-                        borrowerSearchDropdown.querySelectorAll('.search-result-item').forEach(item => {
-                            item.addEventListener('click', function() {
-                                const borrowerId = this.dataset.borrowerId;
-                                const page = this.dataset.page;
-                                borrowerSearchInput.value = '';
-                                borrowerSearchDropdown.style.display = 'none';
-                                // Navigate to borrow page and highlight
-                                loadModule('modules/transactions/borrow.php?page=' + page, null);
-                                setTimeout(() => highlightBorrowerRow(borrowerId), 500);
-                            });
-                        });
-                    } else {
-                        borrowerSearchDropdown.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: default;">
-                            <div>
-                                <div style="font-weight: 600;">Borrower not found</div>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Click the "+ New Transaction" button to create a new borrower</div>
-                            </div>
-                        </div>`;
-                        borrowerSearchDropdown.style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error('Search error:', error);
-                    borrowerSearchDropdown.style.display = 'none';
-                }
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!borrowerSearchContainer.contains(e.target)) {
-                    borrowerSearchDropdown.style.display = 'none';
-                }
-            });
-
-            // Highlight borrower row
-            window.highlightBorrowerRow = function(borrowerId) {
-                const rows = document.querySelectorAll('.borrow-table tbody tr.main-row');
-                rows.forEach(row => {
-                    if (row.dataset.borrowerId && parseInt(row.dataset.borrowerId) === parseInt(borrowerId)) {
-                        row.style.backgroundColor = '#dfe8f5';
-                        row.style.boxShadow = 'inset 0 0 0 2px #8faadc';
-                        row.style.transition = 'all 0.3s ease';
-                        row.classList.add('highlighted-row');
-                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Clear highlight on row click or action button click
-                        const clearHighlight = () => {
-                            row.style.backgroundColor = '';
-                            row.style.boxShadow = '';
-                            row.classList.remove('highlighted-row');
-                            row.removeEventListener('click', clearHighlight);
-                            actionButtons.forEach(btn => btn.removeEventListener('click', clearHighlight));
-                        };
-                        
-                        row.addEventListener('click', clearHighlight);
-                        const actionButtons = row.querySelectorAll('.btn-action');
-                        actionButtons.forEach(btn => btn.addEventListener('click', clearHighlight));
-                    }
-                });
-            };
-        }
     </script>
 </body>
 </html>

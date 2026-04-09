@@ -427,7 +427,8 @@ function renderOverdueListPage($data) {
 
         .overdue-header-text {
             font-size: 14px;
-            color: #475569;
+            color: #000000;
+            font-weight: 400;
             margin: 0;
         }
 

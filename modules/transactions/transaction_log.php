@@ -227,8 +227,8 @@ function renderTransactionLogPage($data) {
         }
 
         .transaction-log-header-text {
-            font-size: 15px;
-            color: var(--log-text-muted);
+            font-size: 14px;
+            color: #000000;
             margin: 0;
             font-weight: 400;
         }
@@ -256,8 +256,8 @@ function renderTransactionLogPage($data) {
         }
 
         .transaction-log-header-text {
-            font-size: 15px;
-            color: var(--log-text-muted);
+            font-size: 14px;
+            color: #000000;
             margin: 0;
             font-weight: 400;
             white-space: nowrap;

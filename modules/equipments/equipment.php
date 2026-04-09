@@ -134,7 +134,7 @@ $items_result = mysqli_query($conn, $query);
 
         /* Card Dimensions 150, 210, 40 */
         --equipment-card-width: 200px;
-        --equipment-card-height: 320px;
+        --equipment-card-height: 340px;
         --equipment-img-height: 60%; 
 
         /* Font Sizes */
@@ -164,15 +164,18 @@ $items_result = mysqli_query($conn, $query);
         font-family: 'Inter', sans-serif;
         background: var(--equipment-bg);
         color: var(--equipment-font-color);
-        padding: 40px 40px 40px 40px;
+        padding: 20px 40px 20px 40px;
         border-radius: 0 0 8px 8px; 
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 60px);
     }
 
     .equipment-container .inventory-header { 
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
-        margin-bottom: 2rem; 
+        margin-bottom: 20px; 
     }
 
     .equipment-container .stats-text { 
@@ -339,7 +342,7 @@ $items_result = mysqli_query($conn, $query);
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
         gap: 10px; 
         border-top: 1px solid var(--saas-border); 
-        padding-top: 30px; 
+        padding-top: 20px; 
     }
 
     /* Shared Card Styles */
@@ -481,9 +484,10 @@ $items_result = mysqli_query($conn, $query);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 30px;
+        margin-top: auto;
         padding-top: 20px;
         border-top: 1px solid var(--saas-border);
+        flex-shrink: 0;
     }
 
     .saas-nav-btn {

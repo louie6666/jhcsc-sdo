@@ -82,6 +82,9 @@ function handleApiRequest() {
     
     try {
         switch ($action) {
+            case 'check_borrower_exists':
+                handleCheckBorrowerExists();
+                break;
             case 'search_borrower':
                 handleSearchBorrower();
                 break;
@@ -118,6 +121,11 @@ function handleApiRequest() {
  * Determine which API action is being requested
  */
 function determineAction() {
+    // Check query string first
+    if (isset($_GET['action'])) {
+        return $_GET['action'];
+    }
+    
     // Check Content-Type for JSON
     if (!empty($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
         $input = json_decode(file_get_contents('php://input'), true);
@@ -135,6 +143,9 @@ function determineAction() {
     }
     if (isset($_POST['header_id']) && isset($_POST['equipment_ids'])) {
         return 'add_equipment';
+    }
+    if (isset($_POST['id_number']) && !isset($_POST['full_name'])) {
+        return 'check_borrower_exists';
     }
     if (isset($_POST['id_number']) && isset($_POST['full_name'])) {
         return 'create_transaction';
@@ -229,6 +240,35 @@ function handleGetBorrowedItems() {
 }
 
 /**
+ * Check if borrower ID already exists
+ */
+function handleCheckBorrowerExists() {
+    global $conn;
+    
+    $id_number = isset($_POST['id_number']) ? trim($_POST['id_number']) : '';
+    
+    if (empty($id_number)) {
+        sendJsonError('ID number required');
+    }
+    
+    $query = "SELECT borrower_id FROM Borrowers WHERE id_number = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $id_number);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    
+    $exists = mysqli_num_rows($result) > 0;
+    
+    echo json_encode([
+        'success' => true,
+        'exists' => $exists,
+        'id_number' => $id_number
+    ]);
+    
+    mysqli_stmt_close($stmt);
+}
+
+/**
  * Create a new borrow transaction (new or existing borrower)
  */
 function handleCreateTransaction() {
@@ -255,11 +295,25 @@ function handleCreateTransaction() {
         sendJsonError('Please select at least one equipment');
     }
     
+    // Check if ID already exists
+    $check_query = "SELECT borrower_id FROM Borrowers WHERE id_number = ?";
+    $check_stmt = mysqli_prepare($conn, $check_query);
+    mysqli_stmt_bind_param($check_stmt, "s", $id_number);
+    mysqli_stmt_execute($check_stmt);
+    $check_result = mysqli_stmt_get_result($check_stmt);
+    
+    if (mysqli_num_rows($check_result) > 0) {
+        mysqli_stmt_close($check_stmt);
+        sendJsonError('Error: Borrower ID "' . htmlspecialchars($id_number) . '" already exists in the system. Please use a different ID number.');
+    }
+    
+    mysqli_stmt_close($check_stmt);
+    
     try {
         mysqli_begin_transaction($conn);
         
-        // Step 1: Get or create borrower
-        $borrower_id = getOrCreateBorrower($conn, $id_number, $full_name, $department, $contact_no);
+        // Step 1: Create new borrower (since we verified it doesn't exist)
+        $borrower_id = createNewBorrower($conn, $id_number, $full_name, $department, $contact_no);
         
         // Step 2: Create transaction header
         $header_id = createTransactionHeader($conn, $borrower_id, $_SESSION['user_id']);
@@ -521,24 +575,9 @@ function handleSearchBorrowers() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Get existing borrower or create new one
+ * Create a new borrower (called from transaction creation after ID validation)
  */
-function getOrCreateBorrower($conn, $id_number, $full_name, $department, $contact_no) {
-    $query = "SELECT borrower_id FROM Borrowers WHERE id_number = ?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "s", $id_number);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    
-    if (mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-        return $row['borrower_id'];
-    }
-    
-    mysqli_stmt_close($stmt);
-    
-    // Create new borrower
+function createNewBorrower($conn, $id_number, $full_name, $department, $contact_no) {
     $insert_query = "INSERT INTO Borrowers (id_number, full_name, department, contact_no) 
                      VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $insert_query);
@@ -702,7 +741,7 @@ function loadPageData() {
 }
 
 /**
- * Get transaction statistics
+ * Get transaction statistics (excluding overdue)
  */
 function getTransactionStats($conn) {
     $query = "SELECT 
@@ -710,7 +749,7 @@ function getTransactionStats($conn) {
                 COUNT(ti.item_record_id) as total_items
               FROM Transaction_Items ti
               JOIN Transaction_Headers th ON ti.header_id = th.header_id
-              WHERE ti.item_status = 'Borrowed'";
+              WHERE ti.item_status = 'Borrowed' AND ti.due_date >= NOW()";
     
     $result = mysqli_query($conn, $query);
     if (!$result) {
@@ -725,7 +764,7 @@ function getTransactionStats($conn) {
 }
 
 /**
- * Get active borrowing transactions
+ * Get active borrowing transactions sorted by most recent first (excluding overdue)
  */
 function getActiveTransactions($conn, $limit, $offset) {
     $query = "SELECT 
@@ -736,9 +775,9 @@ function getActiveTransactions($conn, $limit, $offset) {
               FROM Borrowers b
               JOIN Transaction_Headers th ON b.borrower_id = th.borrower_id
               JOIN Transaction_Items ti ON th.header_id = ti.header_id
-              WHERE ti.item_status = 'Borrowed'
+              WHERE ti.item_status = 'Borrowed' AND ti.due_date >= NOW()
               GROUP BY th.header_id
-              ORDER BY b.full_name ASC
+              ORDER BY th.borrow_date DESC
               LIMIT ? OFFSET ?";
     
     $stmt = mysqli_prepare($conn, $query);
@@ -844,8 +883,10 @@ function renderBorrowPage($data) {
         .borrow-container {
             font-family: 'Inter', sans-serif;
             background: var(--brw-bg);
-            padding: 40px;
-            border-radius: 0 0 8px 8px;
+            padding: 20px 40px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 60px);
         }
 
         .borrow-header-row {
@@ -877,14 +918,15 @@ function renderBorrowPage($data) {
         .borrow-divider {
             border: none;
             border-bottom: 1px solid var(--brw-border);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .borrow-table-wrapper {
             background: #ffffff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
+            overflow: auto;
+            flex: 0 1 auto;
         }
 
         .borrow-table {
@@ -904,14 +946,16 @@ function renderBorrowPage($data) {
 
         .borrow-table td {
             padding: 10px 20px;
-            font-size: 14px;
+            font-size: 12px;
             color: #000000;
             border-bottom: 1px solid var(--brw-border);
             vertical-align: middle;
+            letter-spacing: normal;
         }
 
         .borrow-table tbody tr.main-row:nth-child(odd) { background-color: #ffffff; }
         .borrow-table tbody tr.main-row:nth-child(even) { background-color: #f9fafb; }
+        .borrow-table tbody tr.main-row:hover { background-color: #f0f4f9; }
 
         .items-list {
             padding: 8px 0;
@@ -922,10 +966,11 @@ function renderBorrowPage($data) {
             justify-content: flex-start;
             align-items: center;
             padding: 4px 0;
-            font-size: 13px;
+            font-size: 12px;
             border-bottom: 1px solid #f1f5f9;
             margin-bottom: 4px;
             gap: 6px;
+            letter-spacing: normal;
         }
 
         .items-list > div:last-child {
@@ -940,25 +985,30 @@ function renderBorrowPage($data) {
 
         .actions-cell {
             display: flex;
-            gap: 4px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .btn-action {
-            padding: 6px 10px;
+            min-width: 36px;
+            height: 36px;
+            padding: 8px 12px;
             border: 1px solid var(--brw-border);
             background: white;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             transition: all 0.2s;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .btn-action:hover {
             background: var(--brw-hover);
             color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(12, 31, 63, 0.18);
         }
 
         /* Return Sidebar */
@@ -1028,8 +1078,9 @@ function renderBorrowPage($data) {
 
         .item-name {
             color: #1e293b;
-            font-size: 13px;
+            font-size: 12px;
             flex: 1;
+            letter-spacing: normal;
         }
 
         /* Pagination */
@@ -1037,9 +1088,10 @@ function renderBorrowPage($data) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 30px;
+            margin-top: auto;
             padding-top: 20px;
             border-top: 1px solid var(--brw-border);
+            flex-shrink: 0;
         }
 
         .saas-pages {
@@ -1254,13 +1306,13 @@ function renderBorrowPage($data) {
         <table class="borrow-table">
             <thead>
                 <tr>
-                    <th style="width: 12%;">ID Number</th>
-                    <th style="width: 18%;">Borrower Name</th>
-                    <th style="width: 26%;">Items Borrowed</th>
+                    <th style="width: 11%;">ID Number</th>
+                    <th style="width: 19%;">Borrower Name</th>
+                    <th style="width: 30%;">Items Borrowed</th>
                     <th style="width: 10%;">Borrow Date</th>
                     <th style="width: 10%;">Due Date</th>
-                    <th style="width: 12%;">Contact</th>
-                    <th style="width: 12%;">Actions</th>
+                    <th style="width: 10%;">Contact</th>
+                    <th style="width: 10%;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -1309,11 +1361,11 @@ function renderBorrowPage($data) {
                             <div class="actions-cell">
                                 <button class="btn-action" title="Return checked items"
                                     onclick="submitInlineReturn(<?php echo $row['header_id']; ?>)">
-                                    <span class="material-symbols-outlined" style="font-size: 14px;">assignment_return</span>
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">assignment_return</span>
                                 </button>
                                 <button class="btn-action" title="Add items"
                                     onclick="openAddBorrowModal(<?php echo $row['header_id']; ?>, <?php echo $row['borrower_id']; ?>)">
-                                    <span class="material-symbols-outlined" style="font-size: 14px;">add_circle</span>
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
                                 </button>
                             </div>
                         </td>
@@ -1330,8 +1382,7 @@ function renderBorrowPage($data) {
         </table>
     </div>
 
-    <!-- Pagination -->
-    <?php if($data['total_pages'] > 1): ?>
+    <!-- Pagination (Always Visible) -->
     <div class="saas-pagination">
         <a href="#" onclick="loadModule('modules/transactions/borrow.php?page=<?php echo max(1, $data['page'] - 1); ?>'); return false;" 
            class="saas-nav-btn <?php echo ($data['page'] <= 1) ? 'disabled' : ''; ?>">
@@ -1350,7 +1401,6 @@ function renderBorrowPage($data) {
             Next <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
         </a>
     </div>
-    <?php endif; ?>
 </div>
 
 <!-- Damage Description Modal -->

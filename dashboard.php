@@ -22,27 +22,37 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     <style>
         :root {
             /* COLORS */
-            --bg-primary: #f8fafc;
-            --sidebar-bg: #ecefec;
-            --text-main: #1a1c1e;
-            --text-light: #ffffff;
-            --text-muted: black;
-            --accent-blue: #8faadc;
-            --hover-bg: #8faadc;
-            --hover-submenu: #8faadc;
-            --active-link: #0c1f3f;
-            --border: white;
+            --dbui-bg-primary: #f8fafc;
+            --dbui-sidebar-bg: #f5f7f5;
+            --dbui-text-main: #000000;
+            --dbui-text-light: #ffffff;
+            --dbui-text-muted: #6b7280;
+            --dbui-hover-bg: #edf3ed;
+            --dbui-hover-submenu: #edf3ed;
+            --dbui-active-link: #edf3ed;
+            --dbui-border: transparent;
+            --dbui-menu-text: #000000;
 
             /* SIZING */
-            --sidebar-width: 280px;
-            --sidebar-collapsed-width: 80px;
-            --header-height: 60px;
-            --radius: 8px;
-            --icon-size: 18px; 
+            --dbui-sidebar-width: 230px;
+            --dbui-sidebar-collapsed-width: 80px;
+            --dbui-header-height: 60px;
+            --dbui-radius: 8px;
+            --dbui-icon-size: 18px; 
+            /* Sidebar hover inset from left/right edge (adjust to 5px or 10px as you like) */
+            --dbui-sidebar-hover-gap: 5px;
+            /* Icon distance from left edge of menu pill (matched to submenu feel) */
+            --dbui-sidebar-link-padding-x: 10px;
+            /* Space between menu icon and menu text (e.g., Dashboard) */
+            --dbui-sidebar-icon-text-gap: 5px;
+            /* Sidebar header left/right inner spacing (logo/title block position) */
+            --dbui-sidebar-header-padding-x: 10px;
+            /* Space between logo and title text in header */
+            --dbui-sidebar-logo-title-gap: 5px;
 
             /* --- ADJUST CONTENT SPACING --- */
-            --body-padding-top: 1px; 
-            --body-padding-side: 1px; 
+            --dbui-body-padding-top: 1px; 
+            --dbui-body-padding-side: 1px; 
         }
 
         * {
@@ -54,7 +64,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         }
 
         body {
-            background-color: var(--bg-primary);
+            background-color: var(--dbui-bg-primary);
             display: flex;
             height: 100vh;
             overflow: hidden;
@@ -62,49 +72,35 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
-            color: var(--text-light);
+            width: var(--dbui-sidebar-width);
+            background-color: var(--dbui-sidebar-bg);
+            color: var(--dbui-text-light);
             height: 100vh;
             display: flex;
             flex-direction: column;
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid var(--dbui-text-submenu);
         }
 
-        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar.collapsed { width: var(--dbui-sidebar-collapsed-width); }
 
         .sidebar-header {
-            padding: 0 20px;
+            padding: 0 var(--dbui-sidebar-header-padding-x);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: var(--header-height); 
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+            height: var(--dbui-header-height); 
+            border-bottom: none;
+            margin-bottom: 6px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: var(--dbui-sidebar-logo-title-gap);
             cursor: pointer;
         }
-
-        .menu-trigger {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s;
-        }
-
-        .menu-trigger:hover { color: var(--hover-bg); }
 
         .logo-box {
     min-width: 40px; /* Slightly wider for a professional logo feel */
@@ -123,38 +119,54 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 }
 
         .header-text { white-space: nowrap; }
-        .header-text strong { display: block; font-size: 14px; color: var(--text-muted); line-height: 1; }
-        .header-text p { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+        .header-text strong { display: block; font-size: 14px; color: var(--dbui-text-main); line-height: 1; }
+        .header-text p { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--dbui-text-muted); margin-top: 4px; }
 
         /* NAVIGATION */
-        .nav-menu { flex: 1; padding: 0 15px; margin-top: 30px; }
+        .menu-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--dbui-text-muted);
+            padding: 0 calc(var(--dbui-sidebar-hover-gap) + var(--dbui-sidebar-link-padding-x));
+            margin-top: 2px;
+            margin-bottom: 6px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .nav-menu { flex: 1; padding: 5px; margin-top: 4px; }
         .nav-item { list-style: none; margin-bottom: 4px; }
 
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 10px 12px;
-            color: var(--text-muted);
+            /* 5px left icon gap inside blue hover/active pill */
+            padding: 10px var(--dbui-sidebar-link-padding-x);
+            /* Creates the visual gap so hover/active bg does not touch sidebar border */
+            margin: 0 var(--dbui-sidebar-hover-gap);
+            color: var(--dbui-menu-text);
             text-decoration: none;
             font-size: 14px;
-            border-radius: var(--radius);
+            font-weight: 400;
+            border-radius: var(--dbui-radius);
             transition: all 0.2s;
             white-space: nowrap;
             cursor: pointer;
         }
 
         .nav-link svg { 
-            width: var(--icon-size) !important;
-            height: var(--icon-size) !important;
-            margin-right: 12px; 
+            width: var(--dbui-icon-size) !important;
+            height: var(--dbui-icon-size) !important;
+            margin-right: var(--dbui-sidebar-icon-text-gap); 
             stroke-width: 1.5;
         }
 
-        .nav-link:hover { background-color: var(--hover-bg); color: var(--text-light); }
+        .nav-link:hover { background-color: var(--dbui-hover-bg); color: var(--dbui-text-main); }
         .nav-link.active { 
-            background-color: var(--active-link); 
-            color: var(--text-light) !important; 
-            box-shadow: inset 3px 0 0 var(--accent-blue); 
+            background-color: var(--dbui-active-link); 
+            color: var(--dbui-text-main) !important; 
+            font-weight: 500;
+            box-shadow: none; 
         }
 
         /* SUBMENU */
@@ -169,25 +181,29 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
         .submenu-link {
             display: block;
-            padding: 8px 12px;
-            color: var(--text-muted);
+            padding: 8px 10px;
+            /* Match hover inset with top-level menu */
+            margin: 0 var(--dbui-sidebar-hover-gap);
+            color: var(--dbui-text-main);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 400;
             border-radius: 6px;
             transition: all 0.2s;
         }
 
-        .submenu-link:hover { background-color: var(--hover-submenu); color: var(--text-light); }
+        .submenu-link:hover { background-color: var(--dbui-hover-submenu); color: var(--dbui-text-main); }
         .chevron-icon { transition: transform 0.3s; }
         .submenu-link.active {
-            background-color: var(--active-link);
-            color: var(--text-light) !important;
-            box-shadow: inset 3px 0 0 var(--accent-blue);
+            background-color: var(--dbui-active-link);
+            color: var(--dbui-text-main) !important;
+            font-weight: 500;
+            box-shadow: none;
         }
 
         /* COLLAPSE STATES */
         .sidebar.collapsed .header-text,
-        .sidebar.collapsed .menu-trigger,
+        .sidebar.collapsed .menu-label,
         .sidebar.collapsed .nav-link span,
         .sidebar.collapsed .chevron-icon,
         .sidebar.collapsed .submenu { display: none; }
@@ -220,13 +236,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         .search-container input {
             width: 100%;
             padding: 8px 12px 8px 35px;
-            border-radius: var(--radius);
+            border-radius: var(--dbui-radius);
             border: 1px solid #e5e7eb;
             font-size: 14px;
-            background: var(--bg-primary);
+            background: var(--dbui-bg-primary);
             outline: none;
         }
-        .search-container svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-container svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--dbui-text-muted); }
 
         /*.dashboard-body { padding: var(--body-padding-top) var(--body-padding-side); }*/
         /* This is the parent of the header and the body */
@@ -241,13 +257,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
 /* This is your header */
 .top-header {
-    height: var(--header-height);
-    background: var(--sidebar-bg); /* Use a solid color */
+    height: var(--dbui-header-height);
+    background: var(--dbui-sidebar-bg); /* Use a solid color */
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 55px 0 40px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--dbui-border);
     
     /* The Fix */
     position: relative; /* Change from sticky to relative */
@@ -259,10 +275,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 .dashboard-body {
     flex: 1; /* Takes up all remaining space */
     overflow-y: auto; /* The scroll happens ONLY here now */
-    padding: var(--body-padding-top) var(--body-padding-side);
-    background-color: var(--bg-primary);
+    padding: var(--dbui-body-padding-top) var(--dbui-body-padding-side);
+    background-color: var(--dbui-bg-primary);
 }
-        .dashboard-body h2 { font-size: 24px; color: var(--text-main); }
+        .dashboard-body h2 { font-size: 24px; color: var(--dbui-text-main); }
     </style>
 </head>
 <body>
@@ -277,12 +293,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                     <p>SDO Inventory</p>
                 </div>
             </div>
-            <button class="menu-trigger" id="collapseToggle">
-                <i data-lucide="menu" style="width: 20px;"></i>
-            </button>
         </div>
 
         <ul class="nav-menu">
+            <li class="menu-label">Menu</li>
             <!-- DASHBOARD -->
             <li class="nav-item">
                 <a href="#" class="nav-link active" onclick="loadModule('modules/dashboard/index.php', this); return false;">
@@ -332,7 +346,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             </li>
         </ul>
 
-        <div class="logout-box" style="padding: 20px; border-top: 1px solid var(--border);">
+        <div class="logout-box" style="padding: 20px; border-top: 1px solid var(--dbui-border);">
             <a href="logout.php" class="nav-link" style="color: #ff4d4d;"><i data-lucide="log-out"></i><span>Logout</span></a>
         </div>
     </div>
@@ -340,8 +354,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     <div class="main-content">
         <div class="top-header">
             <div class="header-titles">
-                <h1 id="top-title" style="font-size: 24px; font-weight: 700; color: var(--text-main);">Dashboard</h1>
-                <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
+                <h1 id="top-title" style="font-size: 24px; font-weight: 700; color: var(--dbui-text-main);">Dashboard</h1>
+                <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--dbui-text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
             </div>
             <div class="search-container" id="borrowerSearchContainer" style="position: relative;">
                 <i data-lucide="search" style="width: 16px;"></i>
@@ -429,7 +443,6 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
         // SIDEBAR COLLAPSE LOGIC
         const sidebar = document.getElementById('sidebar');
-        const collapseBtn = document.getElementById('collapseToggle');
         const logoTrigger = document.getElementById('logoTrigger');
 
         const toggleAction = () => {
@@ -440,15 +453,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             lucide.createIcons();
         };
 
-        collapseBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleAction();
-        });
-
+        // Logo toggles collapse/expand in both states
         logoTrigger.addEventListener('click', () => {
-            if(sidebar.classList.contains('collapsed')) {
-                toggleAction();
-            }
+            toggleAction();
         });
 
         // ─── BORROWER SEARCH FUNCTIONALITY ───

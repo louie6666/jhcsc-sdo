@@ -10,16 +10,6 @@ if ($equip_result) {
         $available_items[] = $row;
     }
 }
-
-// Fetch staff list
-$staff_query = "SELECT user_id, full_name FROM Users ORDER BY full_name ASC";
-$staff_result = mysqli_query($conn, $staff_query);
-$staff_list = [];
-if ($staff_result) {
-    while($row = mysqli_fetch_assoc($staff_result)) {
-        $staff_list[] = $row;
-    }
-}
 ?>
 
 <style>
@@ -59,6 +49,7 @@ if ($staff_result) {
         border-radius: 8px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         border: 1px solid var(--borrower-border);
+        overflow: visible;
     }
 
     .borrower-header {
@@ -84,17 +75,26 @@ if ($staff_result) {
         cursor: pointer;
     }
 
-    .borrower-form { padding: 24px; }
+    .borrower-form { 
+        padding: 24px;
+        overflow: visible;
+    }
 
     .borrower-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
+        overflow: visible;
     }
 
     .col-full { grid-column: span 2; }
 
-    .borrower-field { display: flex; flex-direction: column; }
+    .borrower-field { 
+        display: flex; 
+        flex-direction: column;
+        overflow: visible;
+        position: relative;
+    }
 
     .borrower-label {
         font-size: var(--borrower-font-size-label);
@@ -182,8 +182,9 @@ if ($staff_result) {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 10px; /* Space above chips */
+        margin-top: 10px;
         min-height: 20px;
+        padding-right: 0;
     }
 
     .borrower-chip {
@@ -208,20 +209,24 @@ if ($staff_result) {
         line-height: 1;
     }
 
-    .search-wrapper { position: relative; }
+    .search-wrapper { 
+        position: relative;
+        width: 100%;
+        z-index: 100;
+    }
 
     .borrower-dropdown {
         position: absolute;
         width: 100%;
-        top: 100%;
+        top: calc(100% + 4px);
         left: 0;
+        right: 0;
         background: #fff;
         border: 1px solid var(--borrower-border);
         border-radius: 6px;
-        margin-top: 4px;
         max-height: 150px;
         overflow-y: auto;
-        z-index: 10;
+        z-index: 9999;
         display: none;
         box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
     }
@@ -234,9 +239,26 @@ if ($staff_result) {
         cursor: pointer;
         border-bottom: 1px solid #f8fafc;
         transition: background 0.15s;
+        user-select: none;
     }
 
     .dropdown-item:hover { background: #8faadc; color: white; }
+    .dropdown-item:last-child { border-bottom: none; }
+
+    .borrower-error-message {
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #dc2626;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-bottom: 16px;
+        display: none;
+    }
+
+    .borrower-error-message.show {
+        display: block;
+    }
 
     .borrower-footer {
         margin-top: 20px;
@@ -278,6 +300,8 @@ if ($staff_result) {
         </div>
 
         <form action="process_borrow.php" method="POST" id="borrowForm" class="borrower-form">
+            <div id="errorMessage" class="borrower-error-message"></div>
+            
             <div class="borrower-grid">
                 
                 <!-- Line 1: Borrower ID and Full Name -->
@@ -302,32 +326,16 @@ if ($staff_result) {
                     <input type="text" name="contact_no" id="contact_no" placeholder="09..." class="borrower-input">
                 </div>
 
-                <!-- Line 3: Processed By and Return Due Date -->
-                <div class="borrower-field">
-                    <label class="borrower-label">Processed By</label>
-                    <div class="search-wrapper" style="position: relative;">
-                        <input type="text" id="staffSearch" placeholder="Search staff name or ID..." class="borrower-input" autocomplete="off">
-                        <div id="staffDropdown" class="borrower-dropdown">
-                            <?php foreach($staff_list as $staff): ?>
-                                <div class="dropdown-item" onclick="selectStaff('<?php echo $staff['user_id']; ?>', '<?php echo addslashes($staff['full_name']); ?>')">
-                                    <span><?php echo htmlspecialchars($staff['full_name']); ?></span>
-                                    <span style="color: #64748b; font-size: 11px;">ID: <?php echo $staff['user_id']; ?></span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <input type="hidden" name="issued_by_staff_id" id="issued_by_staff_id" value="<?php echo $_SESSION['user_id'] ?? 1; ?>">
-                </div>
-
+                <!-- Line 3: Return Due Date and Search Equipment -->
                 <div class="borrower-field">
                     <label class="borrower-label">Return Due Date</label>
                     <input type="datetime-local" name="due_date" required class="borrower-input">
                 </div>
 
-                <div class="borrower-field col-full">
+                <div class="borrower-field">
                     <label class="borrower-label">Search Equipment</label>
-                    <div class="search-wrapper">
-                        <input type="text" id="equipSearch" placeholder="Type equipment name..." class="borrower-input">
+                    <div class="search-wrapper" style="position: relative;">
+                        <input type="text" id="equipSearch" placeholder="Type equipment name..." class="borrower-input" autocomplete="off">
                         <div id="equipDropdown" class="borrower-dropdown">
                             <?php foreach($available_items as $item): ?>
                                 <div class="dropdown-item" onclick="addBorrowItem('<?php echo $item['equipment_id']; ?>', '<?php echo addslashes($item['name']); ?>')">
@@ -337,8 +345,13 @@ if ($staff_result) {
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    <div id="chipContainer" class="chip-area"></div>
                 </div>
+
+                <!-- Chips container (full width below) -->
+                <div id="chipContainer" class="chip-area" style="grid-column: span 2;"></div>
+
+                <!-- Hidden field: Processed By (auto-set from session) -->
+                <input type="hidden" name="issued_by_staff_id" id="issued_by_staff_id" value="<?php echo $_SESSION['user_id'] ?? 1; ?>">
 
             </div>
 
@@ -353,14 +366,14 @@ if ($staff_result) {
 <script>
     // ─── Data from PHP ───
     const borrowerEquipList = <?php echo json_encode(array_values($available_items)); ?>;
-    const staffList = <?php echo json_encode(array_values($staff_list)); ?>;
 
     // ─── State ───
     let borrowerState = {
         borrowerId: null,
         stagedEquipment: [],
         isNewBorrower: true,
-        selectedStaffId: <?php echo $_SESSION['user_id'] ?? 1; ?>
+        idExists: false,
+        checkingId: false
     };
 
     // ─── Elements ───
@@ -372,53 +385,53 @@ if ($staff_result) {
     const fullNameInput = document.getElementById('full_name');
     const departmentInput = document.getElementById('department');
     const contactInput = document.getElementById('contact_no');
-    const staffSearchInput = document.getElementById('staffSearch');
-    const staffDropdown = document.getElementById('staffDropdown');
     const issuedByStaffIdInput = document.getElementById('issued_by_staff_id');
+    const errorMessage = document.getElementById('errorMessage');
 
-    // ─── Staff Search ───
-    if (staffSearchInput) {
-        staffSearchInput.addEventListener('input', function(e) {
-            const query = this.value.trim().toLowerCase();
-            if (!query) {
-                staffDropdown.style.display = 'none';
-                return;
-            }
+    // ─── Check if Borrower ID Already Exists ───
+    async function checkBorrowerIdExists(idNumber) {
+        if (!idNumber.trim()) {
+            errorMessage.classList.remove('show');
+            borrowerState.idExists = false;
+            return;
+        }
 
-            const matches = staffList.filter(s =>
-                s.full_name.toLowerCase().includes(query) || 
-                s.user_id.toString().includes(query)
-            );
+        borrowerState.checkingId = true;
 
-            if (matches.length === 0) {
-                staffDropdown.innerHTML = '<div style="padding: 10px; text-align: center; color: #999; font-size: 12px;">No staff found</div>';
+        try {
+            const formData = new FormData();
+            formData.append('id_number', idNumber);
+
+            const response = await fetch('modules/transactions/borrow.php?action=check_borrower_exists', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.exists) {
+                borrowerState.idExists = true;
+                errorMessage.textContent = `This person is already borrowing. Search their name in the table if you want to add more items to their transaction.`;
+                errorMessage.classList.add('show');
             } else {
-                staffDropdown.innerHTML = matches.map(s =>
-                    `<div class="dropdown-item" onclick="selectStaff('${s.user_id}', '${s.full_name.replace(/'/g, "\\'")}')">
-                        <span>${s.full_name}</span>
-                        <span style="color: #64748b; font-size: 11px;">ID: ${s.user_id}</span>
-                    </div>`
-                ).join('');
+                borrowerState.idExists = false;
+                errorMessage.classList.remove('show');
             }
-            staffDropdown.style.display = 'block';
+        } catch (error) {
+            console.error('Error checking ID:', error);
+            borrowerState.idExists = false;
+            errorMessage.classList.remove('show');
+        }
+
+        borrowerState.checkingId = false;
+    }
+
+    // ─── Event listener for ID input (check on blur) ───
+    if (idNumberInput) {
+        idNumberInput.addEventListener('blur', function() {
+            checkBorrowerIdExists(this.value);
         });
     }
-
-    function selectStaff(userId, fullName) {
-        borrowerState.selectedStaffId = userId;
-        issuedByStaffIdInput.value = userId;
-        staffSearchInput.value = fullName;
-        staffDropdown.style.display = 'none';
-    }
-
-    // ─── Close staff dropdown when clicking outside ───
-    document.addEventListener('click', function(e) {
-        if (staffSearchInput && staffDropdown) {
-            if (!staffSearchInput.parentElement.contains(e.target)) {
-                staffDropdown.style.display = 'none';
-            }
-        }
-    });
 
     // ─── Toggle Modal ───
     function toggleBorrowModal(show) {
@@ -434,13 +447,12 @@ if ($staff_result) {
     // ─── Reset Form ───
     function resetForm() {
         const sessionUserId = <?php echo $_SESSION['user_id'] ?? 1; ?>;
-        borrowerState = { borrowerId: null, stagedEquipment: [], isNewBorrower: true, selectedStaffId: sessionUserId };
+        borrowerState = { borrowerId: null, stagedEquipment: [], isNewBorrower: true, idExists: false, checkingId: false };
         borrowForm.reset();
         bChipContainer.innerHTML = '';
         bSearchInput.value = '';
-        staffSearchInput.value = '';
         bDropdown.style.display = 'none';
-        staffDropdown.style.display = 'none';
+        errorMessage.classList.remove('show');
         issuedByStaffIdInput.value = sessionUserId;
         idNumberInput.focus();
     }
@@ -449,14 +461,9 @@ if ($staff_result) {
     bSearchInput.addEventListener('input', function(e) {
         const query = e.target.value.trim().toLowerCase();
         
-        if (!query) {
-            bDropdown.style.display = 'none';
-            return;
-        }
-
-        // Filter equipment list and exclude already selected items
+        // If empty, show all items; otherwise filter by query
         const matches = borrowerEquipList.filter(eq => 
-            eq.name.toLowerCase().includes(query) &&
+            (query === '' || eq.name.toLowerCase().includes(query)) &&
             !borrowerState.stagedEquipment.some(s => s.equipment_id == eq.equipment_id)
         );
 
@@ -485,8 +492,26 @@ if ($staff_result) {
         
         renderChips();
         bSearchInput.value = '';
-        bDropdown.style.display = 'none';
         bSearchInput.focus();
+        
+        // Re-show dropdown with updated list
+        setTimeout(() => {
+            const matches = borrowerEquipList.filter(eq =>
+                !borrowerState.stagedEquipment.some(s => s.equipment_id == eq.equipment_id)
+            );
+            
+            if (matches.length === 0) {
+                bDropdown.innerHTML = '<div style="padding: 10px; text-align: center; color: #999; font-size: 12px;">All equipment already selected</div>';
+            } else {
+                bDropdown.innerHTML = matches.map(eq => 
+                    `<div class="dropdown-item" onclick="addBorrowItem(${eq.equipment_id}, '${eq.name.replace(/'/g, "\\'")}', ${eq.available_qty}); return false;">
+                        <span>${eq.name}</span>
+                        <span style="color: #059669; font-weight: bold;">Stock: ${eq.available_qty}</span>
+                    </div>`
+                ).join('');
+            }
+            bDropdown.style.display = 'block';
+        }, 50);
     }
 
     // ─── Remove Equipment ───
@@ -524,11 +549,10 @@ if ($staff_result) {
             return;
         }
 
-        // If it's an existing borrower, confirm before proceeding
-        if (!borrowerState.isNewBorrower) {
-            if (!confirm('Confirm new borrowing transaction for ' + fullName + '?')) {
-                return;
-            }
+        // Check if ID already exists
+        if (borrowerState.idExists) {
+            alert('Error: This Borrower ID already exists. Please use a different ID.');
+            return;
         }
 
         // Prepare data
@@ -538,7 +562,7 @@ if ($staff_result) {
         formData.append('department', departmentInput.value.trim());
         formData.append('contact_no', contactInput.value.trim());
         formData.append('due_date', dueDate);
-        formData.append('issued_by_staff_id', borrowerState.selectedStaffId);
+        formData.append('issued_by_staff_id', issuedByStaffIdInput.value);
         formData.append('is_new_borrower', borrowerState.isNewBorrower ? '1' : '0');
         formData.append('equipment_ids', JSON.stringify(
             borrowerState.stagedEquipment.map(e => e.equipment_id)
@@ -551,7 +575,7 @@ if ($staff_result) {
         submitBtn.textContent = 'Processing...';
 
         try {
-            const response = await fetch('modules/transactions/process_borrow.php', {
+            const response = await fetch('modules/transactions/borrow.php', {
                 method: 'POST',
                 body: formData
             });
@@ -576,10 +600,47 @@ if ($staff_result) {
         }
     });
 
-    // ─── Close dropdown when clicking outside ───
-    document.addEventListener('click', function(e) {
-        if (!bSearchInput.contains(e.target) && !bDropdown.contains(e.target)) {
-            bDropdown.style.display = 'none';
+    // ─── Close dropdowns when clicking outside ───
+    document.addEventListener('mousedown', function(e) {
+        const equipSearch = document.getElementById('equipSearch');
+        const equipDropdown = document.getElementById('equipDropdown');
+        
+        if (equipSearch && equipDropdown) {
+            const searchWrapper = equipSearch.parentElement;
+            // Only hide if clicking outside the wrapper
+            if (!searchWrapper.contains(e.target)) {
+                setTimeout(() => {
+                    equipDropdown.style.display = 'none';
+                }, 100);
+            }
         }
     });
+
+    // ─── Focus on equipment search to show dropdown ───
+    if (bSearchInput) {
+        bSearchInput.addEventListener('focus', function(e) {
+            e.stopPropagation();
+            // Show all available items (filtering for unselected only)
+            const matches = borrowerEquipList.filter(eq =>
+                !borrowerState.stagedEquipment.some(s => s.equipment_id == eq.equipment_id)
+            );
+            
+            if (matches.length === 0) {
+                bDropdown.innerHTML = '<div style="padding: 10px; text-align: center; color: #999; font-size: 12px;">All equipment already selected</div>';
+            } else {
+                bDropdown.innerHTML = matches.map(eq => 
+                    `<div class="dropdown-item" onclick="addBorrowItem(${eq.equipment_id}, '${eq.name.replace(/'/g, "\\'")}', ${eq.available_qty}); return false;">
+                        <span>${eq.name}</span>
+                        <span style="color: #059669; font-weight: bold;">Stock: ${eq.available_qty}</span>
+                    </div>`
+                ).join('');
+            }
+            bDropdown.style.display = 'block';
+        });
+
+        // Allow clicks on dropdown items without closing
+        bDropdown.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+        });
+    }
 </script>

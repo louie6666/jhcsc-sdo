@@ -333,8 +333,11 @@ function renderMaintenancePage($data) {
         .maint-container {
             font-family: 'Inter', sans-serif;
             background: var(--maint-bg);
-            padding: 40px;
-            border-radius: 0 0 8px 8px;
+            padding: 20px 40px 20px 40px;
+            border-radius: none;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 60px);
         }
 
         .maint-header-row {
@@ -353,7 +356,7 @@ function renderMaintenancePage($data) {
         .maint-divider {
             border: none;
             border-bottom: 1px solid var(--maint-border);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .maint-table-wrapper {
@@ -487,9 +490,10 @@ function renderMaintenancePage($data) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 30px;
+            margin-top: auto;
             padding-top: 20px;
             border-top: 1px solid var(--maint-border);
+            flex-shrink: 0;
         }
 
         .saas-pages {

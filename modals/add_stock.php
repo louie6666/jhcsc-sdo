@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_stock_submit'])) {
     }
 
     .as-modal-container {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'Inter', sans-serif;
         background: #ffffff; width: 100%; max-width: 480px;
         border-radius: var(--as-radius);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
@@ -56,26 +56,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_stock_submit'])) {
     }
 
     .as-header {
-        padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid var(--as-border); background-color: var(--as-bg-light);
+        padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
+        border-bottom: none; background-color: var(--as-bg-light);
     }
 
     .as-header h3 { margin: 0; font-weight: 700; font-size: var(--as-fs-title); color: var(--as-primary); }
     .as-close-x { background: none; border: none; color: var(--as-primary); font-size: 20px; font-weight: 700; cursor: pointer; }
 
-    .as-body { padding: 32px; }
-    .as-field-label { display: block; font-size: var(--as-fs-label); font-weight: 700; color: var(--as-text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.025em; }
+    .as-body { padding: 10px 20px; }
+    .as-field-label { display: block; font-size: var(--as-fs-label); font-weight: 400; color: var(--as-text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.025em; }
 
     .as-info-display {
         background: var(--as-bg-light); border: 1px solid var(--as-border);
-        padding: 12px 16px; border-radius: var(--as-radius);
-        margin-bottom: 20px; color: var(--as-primary); font-weight: 600; font-size: var(--as-fs-info);
+        padding: 10px 16px; border-radius: var(--as-radius);
+        margin-bottom: 10px; color: var(--as-primary); font-weight: 400; font-size: var(--as-fs-info);
     }
 
-    .as-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+    .as-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 
     .as-input-styled {
-        width: 100%; padding: 12px 16px; border: 1px solid var(--as-border); 
+        width: 100%; padding: 10px 16px; border: 1px solid var(--as-border); 
         border-radius: var(--as-radius); font-size: var(--as-fs-info);
         color: var(--as-primary); background: #ffffff; box-sizing: border-box;
     }
@@ -83,16 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_stock_submit'])) {
 
     /* Preview Box Styles */
     .as-adjustment-box {
-        background: #f1f5f9; padding: 12px; border-radius: var(--as-radius);
-        border: 1px dashed #cbd5e1; margin-top: 20px; display: none;
+        background: #f1f5f9; padding: 10px 20px; border-radius: var(--as-radius);
+        border: 1px dashed #cbd5e1; margin-top: 10px; display: none;
     }
-    .as-adj-title { display: block; font-size: 12px; font-weight: 700; color: #1e293b; }
+    .as-adj-title { display: block; font-size: 12px; font-weight: 400; color: #1e293b; }
     .as-adj-text { margin: 4px 0 0; font-size: 13px; color: #64748b; }
-    .as-new-total { color: var(--as-primary); font-weight: 700; }
+    .as-new-total { color: var(--as-primary); font-weight: 400; }
 
     .as-footer {
-        padding: 20px 32px; display: flex; justify-content: flex-end; gap: 12px;
-        border-top: 1px solid var(--as-border); background-color: var(--as-bg-light);
+        padding: 10px 20px; display: flex; justify-content: flex-end; gap: 12px;
+        border-top: none; background-color: var(--as-bg-light);
     }
 
     .as-btn { padding: 8px 16px; border-radius: 6px; font-weight: 400; font-size: 12px; cursor: pointer; border: none; transition: 0.2s; }

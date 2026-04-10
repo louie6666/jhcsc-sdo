@@ -160,6 +160,13 @@ if ($is_login_request) {
         z-index: 10;
     }
 
+    .close-modal i,
+    .close-modal .fallback-x {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
     .close-modal:hover {
         color: #000;
         transform: scale(1.1);
@@ -167,7 +174,6 @@ if ($is_login_request) {
 
     .fallback-x {
         display: none; /* Hidden if FontAwesome works */
-        font-size: 24px;
         line-height: 1;
     }
 
@@ -179,7 +185,7 @@ if ($is_login_request) {
     .modal-card p.subtext { font-size: 14px; color: #666; margin-bottom: 32px; }
 
     .form-group { margin-bottom: 24px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 400; margin-bottom: 8px; }
     .form-group input {
         width: 100%;
         padding: 12px 16px;
@@ -191,7 +197,7 @@ if ($is_login_request) {
 
     .form-group input:focus { border-color: #6b5a2e; box-shadow: 0 0 0 1.5px #6b5a2e; }
 
-    .forgot-link { display: inline-block; font-size: 12px; font-weight: 500; color: #1a1a1a; text-decoration: none; margin-bottom: 32px; }
+    .forgot-link { display: inline-block; font-size: 12px; font-weight: 400; color: #1a1a1a; text-decoration: none; margin-bottom: 32px; }
 
     .btn-login {
         width: 100%;

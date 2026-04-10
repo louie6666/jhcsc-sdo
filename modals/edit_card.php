@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_equipment_submit'
     }
 
     .edit-modal-container {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'inter', sans-serif;
         background: #ffffff; width: 100%; max-width: 500px;
         border-radius: var(--as-radius);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
@@ -75,9 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_equipment_submit'
     }
 
     .edit-header {
-        padding: 20px 40px; /* Adjusted to 40px to match body */
+        padding: 10px 20px; /* Adjusted to 40px to match body */
         display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid var(--as-border);
+        border-bottom: none;
     }
 
     .edit-header h3 { margin: 0; font-size: var(--as-fs-title); color: var(--as-primary); font-weight: 700; }
@@ -89,20 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_equipment_submit'
     }
 
     /* Tightened Body Padding to 40px */
-    .edit-body { padding: 40px; }
+    .edit-body { padding: 10px 20px; }
 
     /* Reduced margin-bottom to 12px to remove excessive white space between fields */
-    .edit-field-group { margin-bottom: 12px; }
+    .edit-field-group { margin-bottom: 10px; }
 
     .edit-field-label {
-        display: block; font-size: var(--as-fs-label); font-weight: 700; 
+        display: block; font-size: var(--as-fs-label); font-weight: 400; 
         color: var(--as-text-muted); text-transform: uppercase; 
-        margin-bottom: 6px; letter-spacing: 0.025em;
+        margin-bottom: 10px; letter-spacing: 0.025em;
     }
 
     .image-edit-container {
         display: flex; align-items: center; gap: 16px;
-        background: var(--as-bg-light); padding: 12px;
+        background: var(--as-bg-light); padding: 10px 16px;
         border: 1px solid var(--as-border); border-radius: var(--as-radius);
     }
 
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_equipment_submit'
     }
 
     .edit-input {
-        width: 100%; padding: 10px 14px; /* Slightly tighter internal input padding */
+        width: 100%; padding: 10px 16px; /* Slightly tighter internal input padding */
         border: 1px solid var(--as-border); border-radius: var(--as-radius);
         font-size: var(--as-fs-info); color: var(--as-primary);
         box-sizing: border-box; background: #fff;
@@ -128,10 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_equipment_submit'
     .edit-input:focus { border-color: var(--as-primary); outline: none; }
 
     .edit-footer {
-        padding: 20px 40px; /* Adjusted to 40px to match body */
+        padding: 10px 20px; /* Adjusted to 40px to match body */
         display: flex; 
         justify-content: flex-end; gap: 12px;
-        border-top: 1px solid var(--as-border);
+        border-top: none;
     }
 
     .as-btn {

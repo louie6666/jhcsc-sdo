@@ -57,7 +57,7 @@ if ($equip_result) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: none;
     }
 
     .borrower-header h3 {
@@ -73,6 +73,9 @@ if ($equip_result) {
         font-size: 20px;
         color: var(--borrower-muted);
         cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        line-height: 1;
     }
 
     .borrower-form { 
@@ -98,7 +101,7 @@ if ($equip_result) {
 
     .borrower-label {
         font-size: var(--borrower-font-size-label);
-        font-weight: var(--borrower-font-weight-bold); /* Bold 12px */
+        font-weight: 400;
         color: var(--borrower-muted);
         text-transform: uppercase;
         letter-spacing: 0.02em;
@@ -196,7 +199,7 @@ if ($equip_result) {
         display: flex;
         align-items: center;
         color: #1e40af;
-        font-weight: 600;
+        font-weight: 400;
     }
 
     .borrower-chip button {
@@ -263,7 +266,7 @@ if ($equip_result) {
     .borrower-footer {
         margin-top: 20px;
         padding-top: 16px;
-        border-top: 1px solid #f1f5f9;
+        border-top: none;
         display: flex;
         justify-content: flex-end;
         gap: 12px;
@@ -340,7 +343,7 @@ if ($equip_result) {
                             <?php foreach($available_items as $item): ?>
                                 <div class="dropdown-item" onclick="addBorrowItem('<?php echo $item['equipment_id']; ?>', '<?php echo addslashes($item['name']); ?>')">
                                     <span><?php echo $item['name']; ?></span>
-                                    <span style="color: #059669; font-weight: bold;">Stock: <?php echo $item['available_qty']; ?></span>
+                                    <span style="color: #059669; font-weight: 400;">Stock: <?php echo $item['available_qty']; ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -473,7 +476,7 @@ if ($equip_result) {
             bDropdown.innerHTML = matches.map(eq => 
                 `<div class="dropdown-item" onclick="addBorrowItem(${eq.equipment_id}, '${eq.name.replace(/'/g, "\\'")}', ${eq.available_qty})">
                     <span>${eq.name}</span>
-                    <span style="color: #059669; font-weight: bold;">Stock: ${eq.available_qty}</span>
+                    <span style="color: #059669; font-weight: 400;">Stock: ${eq.available_qty}</span>
                 </div>`
             ).join('');
         }
@@ -506,7 +509,7 @@ if ($equip_result) {
                 bDropdown.innerHTML = matches.map(eq => 
                     `<div class="dropdown-item" onclick="addBorrowItem(${eq.equipment_id}, '${eq.name.replace(/'/g, "\\'")}', ${eq.available_qty}); return false;">
                         <span>${eq.name}</span>
-                        <span style="color: #059669; font-weight: bold;">Stock: ${eq.available_qty}</span>
+                        <span style="color: #059669; font-weight: 400;">Stock: ${eq.available_qty}</span>
                     </div>`
                 ).join('');
             }
@@ -631,7 +634,7 @@ if ($equip_result) {
                 bDropdown.innerHTML = matches.map(eq => 
                     `<div class="dropdown-item" onclick="addBorrowItem(${eq.equipment_id}, '${eq.name.replace(/'/g, "\\'")}', ${eq.available_qty}); return false;">
                         <span>${eq.name}</span>
-                        <span style="color: #059669; font-weight: bold;">Stock: ${eq.available_qty}</span>
+                        <span style="color: #059669; font-weight: 400;">Stock: ${eq.available_qty}</span>
                     </div>`
                 ).join('');
             }

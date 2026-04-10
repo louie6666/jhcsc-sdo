@@ -11,6 +11,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,8 +23,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
     <style>
         :root {
             /* COLORS */
-            --dbui-bg-primary: #ecefec;
-            --dbui-sidebar-bg: #ecefec;
+            --dbui-bg-primary: white;
+            --dbui-sidebar-bg: white;
             --dbui-text-main: #1f2937;
             --dbui-text-light: #ffffff;
             --dbui-text-muted: #000000;
@@ -38,7 +39,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             --dbui-sidebar-collapsed-width: 80px;
             --dbui-header-height: 48px;
             --dbui-radius: 8px;
-            --dbui-icon-size: 18px; 
+            --dbui-icon-size: 18px;
             /* Sidebar hover inset from left/right edge (adjust to 5px or 10px as you like) */
             --dbui-sidebar-hover-gap: 5px;
             /* Icon distance from left edge of menu pill (matched to submenu feel) */
@@ -86,14 +87,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             border-right: 1px solid var(--dbui-border);
         }
 
-        .sidebar.collapsed { width: var(--dbui-sidebar-collapsed-width); }
+        .sidebar.collapsed {
+            width: var(--dbui-sidebar-collapsed-width);
+        }
 
         .sidebar-header {
             padding: 0 var(--dbui-sidebar-header-padding-x);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: var(--dbui-header-height); 
+            height: var(--dbui-header-height);
             border-bottom: none;
             margin-bottom: 6px;
         }
@@ -106,30 +109,48 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         }
 
         .logo-box {
-    min-width: 40px; /* Slightly wider for a professional logo feel */
-    height: 40px;
-    background: transparent; /* Remove the dark background so the emblem stands out */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
+            min-width: 40px;
+            /* Slightly wider for a professional logo feel */
+            height: 40px;
+            background: transparent;
+            /* Remove the dark background so the emblem stands out */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-.logo-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Ensures the emblem isn't stretched */
-}
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Ensures the emblem isn't stretched */
+        }
 
-        .header-text { white-space: nowrap; }
-        .header-text strong { display: block; font-size: 14px; color: var(--dbui-text-main); line-height: 1; }
-        .header-text p { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--dbui-text-muted); margin-top: 4px; }
+        .header-text {
+            white-space: nowrap;
+        }
+
+        .header-text strong {
+            display: block;
+            font-size: 14px;
+            color: var(--dbui-text-main);
+            line-height: 1;
+        }
+
+        .header-text p {
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--dbui-text-muted);
+            margin-top: 4px;
+        }
 
         /* NAVIGATION */
         .menu-label {
             font-size: 12px;
             font-weight: 400;
-            color: var(--dbui-text-muted);
+            color: gray;
             padding: 0 calc(var(--dbui-sidebar-hover-gap) + var(--dbui-sidebar-link-padding-x));
             margin-top: 2px;
             margin-bottom: 6px;
@@ -137,8 +158,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             letter-spacing: normal;
         }
 
-        .nav-menu { flex: 1; padding: 5px; margin-top: 4px; }
-        .nav-item { list-style: none; margin-bottom: 4px; }
+        .nav-menu {
+            flex: 1;
+            padding: 5px;
+            margin-top: 4px;
+        }
+
+        .nav-item {
+            list-style: none;
+            margin-bottom: 4px;
+        }
 
         .nav-link {
             display: flex;
@@ -157,20 +186,24 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             cursor: pointer;
         }
 
-        .nav-link svg { 
+        .nav-link svg {
             width: var(--dbui-icon-size) !important;
             height: var(--dbui-icon-size) !important;
-            margin-right: var(--dbui-sidebar-icon-text-gap); 
+            margin-right: var(--dbui-sidebar-icon-text-gap);
             stroke-width: 1.5;
-            color: var(--dbui-menu-text);
+            color: gray;
         }
 
-        .nav-link:hover { background-color: var(--dbui-hover-bg); color: var(--dbui-text-main); }
-        .nav-link.active { 
-            background-color: var(--dbui-active-link); 
-            color: var(--dbui-text-main) !important; 
+        .nav-link:hover {
+            background-color: var(--dbui-hover-bg);
+            color: var(--dbui-text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--dbui-active-link);
+            color: var(--dbui-text-main) !important;
             font-weight: 500;
-            box-shadow: none; 
+            box-shadow: none;
         }
 
         /* SUBMENU */
@@ -181,7 +214,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             padding-left: 30px;
         }
 
-        .submenu.open { max-height: 200px; margin-bottom: 10px; }
+        .submenu.open {
+            max-height: 200px;
+            margin-bottom: 10px;
+        }
 
         .submenu-link {
             display: block;
@@ -196,8 +232,15 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             transition: all 0.2s;
         }
 
-        .submenu-link:hover { background-color: var(--dbui-hover-submenu); color: var(--dbui-text-main); }
-        .chevron-icon { transition: transform 0.3s; }
+        .submenu-link:hover {
+            background-color: var(--dbui-hover-submenu);
+            color: var(--dbui-text-main);
+        }
+
+        .chevron-icon {
+            transition: transform 0.3s;
+        }
+
         .submenu-link.active {
             background-color: var(--dbui-active-link);
             color: var(--dbui-text-main) !important;
@@ -210,17 +253,41 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         .sidebar.collapsed .menu-label,
         .sidebar.collapsed .nav-link span,
         .sidebar.collapsed .chevron-icon,
-        .sidebar.collapsed .submenu { display: none; }
-        
-        .sidebar.collapsed .header-left { justify-content: center; width: 100%; }
-        .sidebar.collapsed .nav-link { color: var(--dbui-menu-text); }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+
+        .sidebar.collapsed .header-left {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .sidebar.collapsed .nav-link {
+            color: var(--dbui-menu-text);
+
+            display: flex;
+            justify-content: center;
+            /* Centers icon horizontally */
+            align-items: center;
+            /* Centers icon vertically */
+            padding: 10px 20px;
+            /* Removes side padding that causes offset */
+            margin: 0;
+        }
+
         .sidebar.collapsed .nav-link svg {
             margin-right: 0;
             width: var(--dbui-icon-size) !important;
             height: var(--dbui-icon-size) !important;
+            min-width: var(--dbui-icon-size) !important;
+            flex-shrink: 0;
             color: var(--dbui-menu-text);
+
         }
-        .sidebar.collapsed .nav-menu { padding: 0 20px; }
+
+        .sidebar.collapsed .nav-menu {
+            padding: 0 20px;
+        }
 
         /* MAIN CONTENT */
         /*.main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh;}
@@ -244,42 +311,53 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
         /*.dashboard-body { padding: var(--body-padding-top) var(--body-padding-side); }*/
         /* This is the parent of the header and the body */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden; /* Change this to hidden to prevent the container itself from jumping */
-    position: relative;
-}
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            /* Change this to hidden to prevent the container itself from jumping */
+            position: relative;
+        }
 
-/* This is your header */
-.top-header {
-    height: var(--dbui-header-height);
-    background: var(--dbui-sidebar-bg); /* Use a solid color */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 55px 0 40px;
-    border-bottom: 1px solid var(--dbui-border);
-    
-    /* The Fix */
-    position: relative; /* Change from sticky to relative */
-    z-index: 100;
-    flex-shrink: 0; /* CRITICAL: Prevents jumping during scroll */
-}
+        /* This is your header */
+        .top-header {
+            height: var(--dbui-header-height);
+            background: var(--dbui-sidebar-bg);
+            /* Use a solid color */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 55px 0 40px;
+            border-bottom: 1px solid var(--dbui-border);
 
-/* This is the new scrolling area */
-.dashboard-body {
-    flex: 1; /* Takes up all remaining space */
-    overflow-y: auto; /* The scroll happens ONLY here now */
-    /* Adjust left/right white space using the variables in :root */
-    padding: var(--dbui-body-padding-top) var(--dbui-content-padding-right) var(--dbui-body-padding-top) var(--dbui-content-padding-left);
-    background-color: var(--dbui-bg-primary);
-}
-        .dashboard-body h2 { font-size: 24px; color: var(--dbui-text-main); }
+            /* The Fix */
+            position: relative;
+            /* Change from sticky to relative */
+            z-index: 100;
+            flex-shrink: 0;
+            /* CRITICAL: Prevents jumping during scroll */
+        }
+
+        /* This is the new scrolling area */
+        .dashboard-body {
+            flex: 1;
+            /* Takes up all remaining space */
+            overflow-y: auto;
+            /* The scroll happens ONLY here now */
+            /* Adjust left/right white space using the variables in :root */
+            padding: var(--dbui-body-padding-top) var(--dbui-content-padding-right) var(--dbui-body-padding-top) var(--dbui-content-padding-left);
+            background-color: var(--dbui-bg-primary);
+        }
+
+        .dashboard-body h2 {
+            font-size: 24px;
+            color: var(--dbui-text-main);
+        }
     </style>
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -298,11 +376,12 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
             <li class="menu-label">Menu</li>
             <!-- DASHBOARD -->
             <li class="nav-item">
-                <a href="#" class="nav-link active" onclick="loadModule('modules/dashboard/index.php', this); return false;">
+                <a href="#" class="nav-link active"
+                    onclick="loadModule('modules/dashboard/index.php', this); return false;">
                     <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
                 </a>
             </li>
-            
+
             <!-- INVENTORY -->
             <li class="nav-item">
                 <div class="nav-link" id="inventoryToggle">
@@ -311,11 +390,14 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                     <i data-lucide="chevron-down" class="chevron-icon" style="margin-left:auto; width:14px;"></i>
                 </div>
                 <div class="submenu" id="inventoryMenu">
-                    <a href="#" class="submenu-link" onclick="loadModule('modules/equipments/equipment.php', this); return false;">Equipment</a>
-                    <a href="#" class="submenu-link" onclick="loadModule('modules/equipments/maintenance_list.php', this); return false;">Maintenance List</a>
+                    <a href="#" class="submenu-link"
+                        onclick="loadModule('modules/equipments/equipment.php', this); return false;">Equipment</a>
+                    <a href="#" class="submenu-link"
+                        onclick="loadModule('modules/equipments/maintenance_list.php', this); return false;">Maintenance
+                        List</a>
                 </div>
             </li>
-            
+
             <!-- TRANSACTIONS -->
             <li class="nav-item">
                 <div class="nav-link" id="transactionToggle">
@@ -324,9 +406,14 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                     <i data-lucide="chevron-down" class="chevron-icon" style="margin-left:auto; width:14px;"></i>
                 </div>
                 <div class="submenu" id="transactionMenu">
-                    <a href="#" class="submenu-link" onclick="loadModule('modules/transactions/borrow.php', this); return false;">Borrow</a>
-                    <a href="#" class="submenu-link" onclick="loadModule('modules/transactions/overdue_list.php', this); return false;">Overdue List</a>
-                    <a href="#" class="submenu-link" onclick="loadModule('modules/transactions/transaction_log.php', this); return false;">Transaction Log</a>
+                    <a href="#" class="submenu-link"
+                        onclick="loadModule('modules/transactions/borrow.php', this); return false;">Borrow</a>
+                    <a href="#" class="submenu-link"
+                        onclick="loadModule('modules/transactions/overdue_list.php', this); return false;">Overdue
+                        List</a>
+                    <a href="#" class="submenu-link"
+                        onclick="loadModule('modules/transactions/transaction_log.php', this); return false;">Transaction
+                        Log</a>
                 </div>
             </li>
 
@@ -346,15 +433,21 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
         </ul>
 
         <div class="logout-box" style="padding: 20px; border-top: 1px solid var(--dbui-border);">
-            <a href="logout.php" class="nav-link" style="color: #ff4d4d;"><i data-lucide="log-out"></i><span>Logout</span></a>
+            <a href="logout.php" class="nav-link" style="color: #ff4d4d;"><i
+                    data-lucide="log-out"></i><span>Logout</span></a>
         </div>
     </div>
 
     <div class="main-content">
         <div class="top-header">
             <div class="header-titles">
-                <h1 id="top-title" style="font-size: 14px; font-weight: 400; color: var(--dbui-text-main);">Dashboard</h1>
-                <p id="top-desc" style="font-size: 12px; font-weight: 400; color: var(--dbui-text-muted); margin-top: 4px;">Welcome back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is <?php echo date('F j, Y'); ?></p>
+                <h1 id="top-title" style="font-size: 16px; font-weight: 400; color: var(--dbui-text-main);">Dashboard
+                </h1>
+                <p id="top-desc"
+                    style="font-size: 12px; font-weight: 400; color: var(--dbui-text-muted); margin-top: 4px;">Welcome
+                    back, <?php echo htmlspecialchars($_SESSION['full_name']); ?>! Today is
+                    <?php echo date('F j, Y'); ?>
+                </p>
             </div>
         </div>
 
@@ -373,16 +466,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
          */
         function loadModule(url, element = null) {
             const body = document.querySelector('.dashboard-body');
-            
+
             // 1. Update Active States
             if (element) {
                 document.querySelectorAll('.nav-link, .submenu-link').forEach(el => el.classList.remove('active'));
                 element.classList.add('active');
-                
+
                 // Update Top Header Dynamic Titles
                 const moduleName = element.innerText.trim();
                 document.getElementById('top-title').innerText = moduleName;
-                
+
                 const topDesc = document.getElementById('top-desc');
                 if (moduleName.toLowerCase() === 'dashboard') {
                     topDesc.style.display = 'block';
@@ -399,7 +492,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
                 })
                 .then(html => {
                     body.innerHTML = html;
-                    
+
                     // MUST execute scripts manually since innerHTML doesn't evaluate them
                     const scripts = body.querySelectorAll("script");
                     scripts.forEach(oldScript => {
@@ -447,7 +540,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
         const toggleAction = () => {
             sidebar.classList.toggle('collapsed');
-            if(sidebar.classList.contains('collapsed')) {
+            if (sidebar.classList.contains('collapsed')) {
                 document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
                 document.querySelectorAll('.chevron-icon').forEach(icon => {
                     icon.style.transform = 'rotate(0deg)';
@@ -463,4 +556,5 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/jhcsc_seis/connection.php';
 
     </script>
 </body>
+
 </html>

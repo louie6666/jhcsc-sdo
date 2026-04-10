@@ -51,7 +51,7 @@ if ($equip_result) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: none;
         position: sticky;
         top: 0;
         background: var(--add-card);
@@ -70,6 +70,9 @@ if ($equip_result) {
         font-size: 20px;
         color: var(--add-muted);
         cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        line-height: 1;
     }
 
     .add-borrow-form { padding: 24px; }
@@ -80,7 +83,7 @@ if ($equip_result) {
 
     .section-title {
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 400;
         color: var(--add-muted);
         text-transform: uppercase;
         letter-spacing: 0.02em;
@@ -153,7 +156,7 @@ if ($equip_result) {
 
     .current-item:last-child { border-bottom: none; }
 
-    .item-name { font-weight: 500; color: var(--add-text); }
+    .item-name { font-weight: 400; color: var(--add-text); }
     .item-status { font-size: 11px; color: var(--add-muted); }
 
     .added-items {
@@ -174,7 +177,7 @@ if ($equip_result) {
         align-items: center;
         gap: 6px;
         color: #1e40af;
-        font-weight: 600;
+        font-weight: 400;
     }
 
     .chip-remove {
@@ -189,7 +192,7 @@ if ($equip_result) {
 
     .add-borrow-footer {
         padding: 16px 24px;
-        border-top: 1px solid #f1f5f9;
+        border-top: none;
         display: flex;
         justify-content: flex-end;
         gap: 12px;
@@ -353,7 +356,7 @@ if ($equip_result) {
                 dropdown.innerHTML = matches.map(e => `
                     <div class="add-drop-item" onclick="stageEquipmentForAdd(${e.equipment_id}, '${e.name.replace(/'/g, "\\'")}', ${e.available_qty})">
                         <span>${e.name}</span>
-                        <span style="color: #059669; font-weight: 600; font-size: 11px;">Stock: ${e.available_qty}</span>
+                        <span style="color: #059669; font-weight: 400; font-size: 11px;">Stock: ${e.available_qty}</span>
                     </div>
                 `).join('');
             }

@@ -87,7 +87,7 @@ $cat_result = mysqli_query($conn, $cat_query);
         background: var(--ae-border-color);
         width: 100%;
         max-width: 600px;
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         display: flex;
         flex-direction: column;
@@ -101,8 +101,8 @@ $cat_result = mysqli_query($conn, $cat_query);
     }
 
     .ae-modal-header {
-        padding: 20px 32px;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 10px 20px;
+        border-bottom: none;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -116,7 +116,7 @@ $cat_result = mysqli_query($conn, $cat_query);
     }
 
     .ae-modal-body {
-        padding: 32px;
+        padding: 10px 20px;
         max-height: 80vh;
         overflow-y: auto;
     }
@@ -139,13 +139,13 @@ $cat_result = mysqli_query($conn, $cat_query);
 
     .ae-input-group label {
         font-size: var(--ae-fs-label);
-        font-weight: var(--ae-fw-bold);
+        font-weight: 400;
         text-transform: uppercase;
         color: #64748b;
     }
 
     .ae-input-group input {
-        padding: 12px;
+        padding: 10px 16px;
         border: 1.5px solid #e2e8f0;
         border-radius: var(--ae-radius);
         font-size: var(--ae-fs-button);
@@ -184,12 +184,25 @@ $cat_result = mysqli_query($conn, $cat_query);
     }
 
     .ae-modal-footer {
-        padding: 20px 32px;
+        padding: 10px 20px;
         background: #f8fafc;
         display: flex;
         justify-content: flex-end;
-        gap: 12px;
-        border-top: 1px solid rgba(0,0,0,0.05);
+        gap: 10px;
+        border-top: none;
+    }
+
+    .ae-close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .ae-close-btn .material-symbols-outlined {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--ae-buttons);
     }
 
     .ae-btn {
@@ -209,7 +222,7 @@ $cat_result = mysqli_query($conn, $cat_query);
     <div class="ae-modal-container">
         <div class="ae-modal-header">
             <h2>Add New Equipment</h2>
-            <button onclick="closeEquipmentModal()" style="background:none; border:none; cursor:pointer;">
+            <button class="ae-close-btn" onclick="closeEquipmentModal()">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>

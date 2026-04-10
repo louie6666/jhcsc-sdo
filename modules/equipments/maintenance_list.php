@@ -332,19 +332,19 @@ function renderMaintenancePage($data) {
 
         .maint-container {
             font-family: 'Inter', sans-serif;
-            background: var(--maint-bg);
-            padding: 20px 40px 20px 40px;
+            background: white;
+            padding: 30px 40px 20px 40px;
             border-radius: none;
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 60px);
+            min-height: calc(100vh - 55px);
         }
 
         .maint-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .maint-header-text {
@@ -357,7 +357,7 @@ function renderMaintenancePage($data) {
         .maint-divider {
             border: none;
             border-bottom: 1px solid var(--maint-border);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .maint-table-wrapper {
@@ -375,7 +375,7 @@ function renderMaintenancePage($data) {
         .maint-table th {
             background: var(--maint-hover);
             color: #ecefec;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 400;
             padding: 10px 20px;
             text-transform: uppercase;
@@ -403,8 +403,9 @@ function renderMaintenancePage($data) {
         }
 
         .equipment-name {
-            font-weight: 600;
+            font-weight: 400;
             color: #000000;
+            font-size: 14px;
         }
 
         .equipment-location {
@@ -417,16 +418,17 @@ function renderMaintenancePage($data) {
             max-width: 300px;
             white-space: normal;
             word-wrap: break-word;
-            color: #334155;
-            font-size: 13px;
+            color: black;
+            font-size: 14px;
+            font-weight: 400;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 7px 8px;
             border-radius: 4px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 400;
             text-align: center;
             min-width: 70px;
         }
@@ -458,7 +460,7 @@ function renderMaintenancePage($data) {
         }
 
         .btn-action {
-            padding: 6px 10px;
+            padding: 4px 8px;
             border: 1px solid var(--maint-border);
             background: white;
             border-radius: 4px;
@@ -467,7 +469,7 @@ function renderMaintenancePage($data) {
             align-items: center;
             transition: all 0.2s;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 400;
             color: var(--maint-buttons);
         }
 
@@ -512,8 +514,8 @@ function renderMaintenancePage($data) {
             justify-content: center;
             text-decoration: none;
             color: #475569;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 400;
             border-radius: 4px;
             cursor: pointer;
         }
@@ -536,8 +538,8 @@ function renderMaintenancePage($data) {
             color: var(--maint-buttons);
             border: 1px solid var(--maint-border);
             border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 400;
             text-decoration: none;
             transition: all 0.2s;
             cursor: pointer;

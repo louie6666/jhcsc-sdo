@@ -882,8 +882,8 @@ function renderBorrowPage($data) {
 
         .borrow-container {
             font-family: 'Inter', sans-serif;
-            background: var(--brw-bg);
-            padding: 20px 40px 20px 40px;
+            background: white;
+            padding: 30px 40px 20px 40px;
             display: flex;
             flex-direction: column;
             min-height: calc(100vh - 60px);
@@ -897,7 +897,7 @@ function renderBorrowPage($data) {
         }
 
         .borrow-header-text {
-            font-size: 14px;
+            font-size: 16px;
             color: #000000;
             margin: 0;
         }
@@ -937,7 +937,7 @@ function renderBorrowPage($data) {
         .borrow-table th {
             background: var(--brw-hover);
             color: #ecefec;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 400;
             padding: 10px 20px;
             text-transform: uppercase;
